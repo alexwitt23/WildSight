@@ -163,7 +163,15 @@ class Detector(torch.nn.Module):
         levels = self.fpn(levels)
         classifications, regressions = self.retinanet_head(levels)
 
-        if self.training:
-            return classifications, regressions
-        else:
-            return self.postprocess(classifications, regressions)
+        return classifications, regressions
+
+    def get_boxes(self, x: torch.Tensor) -> torch.Tensor:
+        levels = self.backbone.forward_pyramids(x)
+        # Only keep the levels specified during construction.
+        levels = collections.OrderedDict(
+            [item for item in levels.items() if item[0] in self.fpn_levels]
+        )
+        levels = self.fpn(levels)
+        classifications, regressions = self.retinanet_head(levels)
+
+        return self.postprocess(classifications, regressions)

@@ -1,14 +1,10 @@
 <template>
   <div class="demo home text-xs-center">
-    <v-img class="banner" :src="require('@/assets/background.png')">
+    <v-img class="banner" :src="require('@/assets/background.jpg')">
       <v-container class="onnx-wrapper">
         <v-layout column justify-center align-center>
           <v-flex class="onnx">WildSight</v-flex>
-          <v-flex class="run-onnx">Run AI model in the browser</v-flex>
-          <v-flex class="onnx-info">Interactive ML without install and device independent<br>
-  Latency of server-client communication reduced<br>
-  Privacy and security ensured<br>
-  GPU acceleration</v-flex>
+          <v-flex class="run-onnx">Run AI models in the browser</v-flex>
         </v-layout>
       </v-container>
     </v-img>
@@ -26,11 +22,8 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 const DEMO_INFO = [
-  { title: 'SqueezeNet, trained on ImageNet', path: 'squeezenet', imagePath: require('@/assets/squeezenet.png') },  
-  { title: 'ResNet50, trained on ImageNet', path: 'resnet50', imagePath: require('@/assets/resnet50.png') },
-  { title: 'Emotion FerPlus', path: 'emotion_ferplus', imagePath: require('@/assets/emotion.png') },
   { title: 'Yolo', path: 'yolo', imagePath: require('@/assets/yolo.png') },
-  { title: 'MNIST', path: 'mnist', imagePath: require('@/assets/mnist.png') },
+  { title: 'Giraffe', path: 'giraffe', imagePath: require('@/assets/yolo.png') },
 ];
 
 @Component

@@ -381,9 +381,9 @@ def create_data_loader(
 
     assert data_dir.is_dir(), data_dir
 
-    #dataset_ = dataset.AfricanWildlife(
+    # dataset_ = dataset.AfricanWildlife(
     #    data_dir, img_width=image_size[0], img_height=image_size[1], validation=val,
-    #)
+    # )
     meta = pathlib.Path(
         "/media/alex/Elements/gzgc.coco/annotations/instances_train2020.json"
     )
@@ -391,7 +391,7 @@ def create_data_loader(
         pathlib.Path("/media/alex/Elements/gzgc.coco/images/train2020"),
         metadata_path=meta,
         img_width=512,
-        img_height=512
+        img_height=512,
     )
 
     # If using distributed training, use a DistributedSampler to load exclusive sets
@@ -412,7 +412,7 @@ def create_data_loader(
         sampler=sampler,
         collate_fn=collate_fn,
         num_workers=max(torch.multiprocessing.cpu_count() // world_size, 8),
-        drop_last=True
+        drop_last=True,
     )
     return loader, sampler
 

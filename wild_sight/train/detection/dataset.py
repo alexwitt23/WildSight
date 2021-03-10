@@ -154,7 +154,7 @@ class AfricanWildlife(torch.utils.data.Dataset):
             box[1::2].clamp_(0.0, 1.0)
             box *= torch.Tensor([width, height, width, height])
             boxes.append(box)
-        
+
         return self.transform(
             image=image, bboxes=boxes, category_ids=category_ids, image_ids=idx,
         )

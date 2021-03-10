@@ -5,6 +5,7 @@ import Resnet50 from '../components/models/Resnet50.vue';
 import SqueezeNet from '../components/models/Squeezenet.vue';
 import Emotion from '../components/models/Emotion.vue';
 import Yolo from '../components/models/Yolo.vue';
+import Giraffe from '../components/models/Giraffe.vue';
 import MNIST from '../components/models/MNIST.vue';
 
 Vue.use(Router);
@@ -19,24 +20,12 @@ export default new Router({
       component: Home,
     },
     {
-      path: '/resnet50',
-      component: Resnet50,
-    },
-    {
-      path: '/squeezenet',
-      component: SqueezeNet,
-    },
-    {
-      path:'/emotion_ferplus',
-      component: Emotion,
-    },
-    {
       path: '/yolo',
       component: Yolo,
     },
     {
-      path:'/mnist',
-      component: MNIST,
+      path:'/giraffe',
+      component: Giraffe,
     }
   ],
 });

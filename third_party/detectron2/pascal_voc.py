@@ -52,9 +52,7 @@ def compute_metrics(
     }
 
 
-def voc_ap(
-    recall: List[float], precision: List[float], 
-) -> Tuple[float, float, float]:
+def voc_ap(recall: List[float], precision: List[float],) -> Tuple[float, float, float]:
     """Compute VOC AP given precision and recall."""
     # first append sentinel values at the end
     max_recall = recall[-1] if len(recall) > 0 else 0
@@ -170,4 +168,4 @@ def voc_eval(
     # ground truth
     precision = tp / np.maximum(tp + fp, np.finfo(np.float32).eps)
 
-    return voc_aggregate(recall, precision)
+    return voc_ap(recall, precision)
