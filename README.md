@@ -23,3 +23,10 @@ TODO(alex)
 ```bash
 PYTHONPATH=. CUDA_VISIBLE_DEVICES=-1 FLASK_APP=wild_sight/web/main.py flask run
 ```
+
+## Web
+
+```
+npm install
+npm run serve
+```
