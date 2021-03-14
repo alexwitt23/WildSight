@@ -15,7 +15,10 @@ python3 -m pip install -r requirements.txt
 
 ## Training
 
-TODO(alex)
+```
+PYTHONPATH=. wild_sight/train/detection/train.py \
+    --config wild_sight/train/configs/vovnet-det.yaml
+```
 
 ## Flask
 (Soon to be removed in favor of Vue.js)

@@ -167,6 +167,7 @@ def train(
             train_sampler.set_epoch(epoch)
 
         previous_loss = None
+
         for idx, (images, gt_regressions, gt_classes) in enumerate(train_loader):
 
             optimizer.zero_grad()
@@ -266,9 +267,7 @@ def train(
 
         if is_main:
             log.info(
-                f"Epoch: {epoch}, Training loss {sum(all_losses) / len(all_losses):.5} \n"
-                f"{eval_results} \n"
-                f"ema results: {ema_eval_results}"
+                f"epoch={epoch}. base={eval_results}. ema_results={ema_eval_results}"
             )
 
 
@@ -312,7 +311,10 @@ def eval(
         if torch.cuda.is_available():
             images_batch = images_batch.cuda()
 
-        detection_batch = model(images_batch)
+        if isinstance(model, parallel.DistributedDataParallel):
+            detection_batch = model.module.get_boxes(images_batch)
+        else:
+            detection_batch = model.get_boxes(images_batch)
         detections.extend(detection_batch)
     labels_list = [None] * distributed.get_world_size()
     detections_list = [None] * distributed.get_world_size()
@@ -392,8 +394,8 @@ def create_data_loader(
         metadata_path=meta,
         img_width=512,
         img_height=512,
+        validation=val,
     )
-
     # If using distributed training, use a DistributedSampler to load exclusive sets
     # of data per process.
     sampler = None
@@ -451,6 +453,8 @@ if __name__ == "__main__":
 
     # Load the model config
     config = yaml.safe_load(config_path.read_text())
+    if initial_timestamp is not None:
+        config["initial_timestamp"] = args.initial_timestamp
     model_cfg = config["model"]
     train_cfg = config["training"]
     data_cfg = config["data"]
@@ -459,7 +463,7 @@ if __name__ == "__main__":
         datetime.datetime.now().isoformat().split(".")[0].replace(":", ".")
     )
     save_dir.mkdir(exist_ok=True, parents=True)
-    shutil.copy(config_path, save_dir / "config.yaml")
+    (save_dir / "config.yaml").write_text(yaml.dump(config))
 
     use_cuda = torch.cuda.is_available()
     world_size = torch.cuda.device_count() if use_cuda else 1  # GPUS or a CPU

@@ -193,11 +193,17 @@ class GZGC(torch.utils.data.Dataset):
                 "annotations": [],
             }
 
+        image_ids = list(self.images.keys())
+        random.Random(42).shuffle(image_ids)
         if validation:
             num_val = int(len(self.images) * 0.2)
-            image_ids = list(self.images.keys())
-            random.shuffle(image_ids)
             keep_ids = image_ids[:num_val]
+            self.images = {
+                key: val for key, val in self.images.items() if key in keep_ids
+            }
+        else:
+            num_val = int(len(self.images) * 0.2)
+            keep_ids = image_ids[:-num_val]
             self.images = {
                 key: val for key, val in self.images.items() if key in keep_ids
             }
@@ -234,3 +240,6 @@ class GZGC(torch.utils.data.Dataset):
 
     def __len__(self) -> int:
         return self.len
+
+    def __str__(self) -> str:
+        return f"{len(self.images)} images."

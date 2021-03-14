@@ -7,7 +7,7 @@ model:
   num_classes: 2
   fpn:
     type: "retinanet"
-    num_channels: 256
+    num_channels: 128
     use_dw: false
     levels: [3, 4, 5, 6, 7]
   retinanet_head:
@@ -28,9 +28,9 @@ training:
     max_lr: 5.0e-4
     end_lr: 1.0e-8
     warmup_fraction: 0.72
-  epochs: 40
-  train_batch_size: 50
-  eval_batch_size: 50
+  epochs: 35
+  train_batch_size: 45
+  eval_batch_size: 45
   eval_start_epoch: 10
 data:
   name: "ENA"
