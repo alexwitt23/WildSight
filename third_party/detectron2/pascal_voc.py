@@ -24,31 +24,18 @@ def compute_metrics(
     ground_truth: List[List[BoundingBox]],
     class_ids: List[int],
 ) -> Dict[str, float]:
-    aps = collections.defaultdict(list)
     iou_30_metrics = collections.defaultdict(list)
 
     for class_id in class_ids:
-        for iou_threshold in range(50, 100, 5):
-            ap, rec = voc_eval(
-                predictions,
-                ground_truth,
-                class_id,
-                iou_threshold=iou_threshold / 100.0,
-            )
-            aps[iou_threshold].append(ap)
         # Separately also compute AP30 so as not to include it into the overall
         # mAP computation. Also compute precision and recall.
         ap30, rec30 = voc_eval(predictions, ground_truth, class_id, iou_threshold=0.3)
         iou_30_metrics["ap30"].append(ap30)
         iou_30_metrics["rec30"].append(rec30)
-    mAP = {iou: np.mean(x) for iou, x in aps.items()}
 
     return {
-        "map_50_100": np.mean(list(mAP.values())),
         "ap30": np.mean(iou_30_metrics["ap30"]),
         "rec30": np.mean(iou_30_metrics["rec30"]),
-        "ap50": mAP[50],
-        "ap75": mAP[75],
     }
 
 

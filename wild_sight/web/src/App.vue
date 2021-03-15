@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import json from '/web_model/anchors.json'
 import * as tf from '@tensorflow/tfjs'
 import { loadGraphModel } from '@tensorflow/tfjs-converter'
 const MODEL_URL = 'http://localhost:8081/web_model/model.json';
@@ -48,6 +49,12 @@ export default {
         for (let i = 0; i < values.size; i++){
           console.log(values)
         }
+        let anchors = [];
+        for (var key of Object.keys(json)) {
+            anchors.push(json[key])
+        }
+        console.log("H", tf.tensor(anchors))
+        
       })
       
       return predictions

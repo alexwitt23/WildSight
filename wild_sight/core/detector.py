@@ -23,7 +23,7 @@ class Detector(torch.nn.Module):
         self,
         model_params: dict = None,
         timestamp: str = None,
-        confidence: float = 0.05,
+        confidence: float = 0.01,
         num_detections_per_image: int = 100,
         half_precision: bool = False,
     ) -> None:
@@ -41,12 +41,14 @@ class Detector(torch.nn.Module):
             # For the distributed pip package, look inside `production_models`
             production_models = pathlib.Path(__file__).parent / "production_models"
             if production_models.is_dir():
-                model_path = production_models / timestamp
+                self.model_path = production_models / timestamp
             else:
                 # Download the model. This has the yaml containing the backbone.
-                model_path = pathlib.Path("~/runs/wild-sight").expanduser() / timestamp
+                self.model_path = (
+                    pathlib.Path("~/runs/wild-sight").expanduser() / timestamp
+                )
 
-            config = yaml.safe_load((model_path / "config.yaml").read_text())
+            config = yaml.safe_load((self.model_path / "config.yaml").read_text())
             model_params = config["model"]
             self._load_params(config["model"])
         else:
@@ -96,9 +98,7 @@ class Detector(torch.nn.Module):
 
         # After all the components are initialized, load the weights.
         if timestamp is not None:
-            self.load_state_dict(
-                torch.load(model_path / "min-loss.pt", map_location="cpu")
-            )
+            self.load_state_dict(torch.load(self.model_path / "ap30.pt", map_location="cpu"))
 
         self.eval()
 

@@ -9,7 +9,10 @@ from third_party import ranger
 
 
 def save_model(model: torch.nn.Module, save_path: pathlib.Path) -> None:
-    torch.save(model.state_dict(), save_path)
+    if isinstance(model, torch.nn.parallel.DistributedDataParallel):
+        torch.save(model.module.state_dict(), save_path)
+    else:
+        torch.save(model.state_dict(), save_path)
 
 
 def create_optimizer(optim_cfg: dict, model: torch.nn.Module) -> torch.optim.Optimizer:

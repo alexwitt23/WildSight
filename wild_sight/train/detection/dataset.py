@@ -197,7 +197,7 @@ class GZGC(torch.utils.data.Dataset):
         random.Random(42).shuffle(image_ids)
         if validation:
             num_val = int(len(self.images) * 0.2)
-            keep_ids = image_ids[:num_val]
+            keep_ids = image_ids[-num_val:]
             self.images = {
                 key: val for key, val in self.images.items() if key in keep_ids
             }

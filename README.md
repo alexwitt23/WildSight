@@ -30,6 +30,12 @@ PYTHONPATH=. CUDA_VISIBLE_DEVICES=-1 FLASK_APP=wild_sight/web/main.py flask run
 ## Web
 
 ```
-npm install
-npm run serve
+cd wild_sight/web
+yarn serve
+```
+
+In a separate terminal, run
+
+```
+http-server . --cors
 ```
