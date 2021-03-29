@@ -15,8 +15,10 @@
 import * as tf from '@tensorflow/tfjs'
 import { RetinaNetDecoder } from '../../utils/retinanet_decoder'
 import MainLayout from '../layouts/Main.vue'
-const MODEL_URL = 'https://storage.googleapis.com/wild-sight/web_model/model.json';
-//const MODEL_URL = "file://../public/web_model/model.json"
+const MODEL_URLS = {
+  'remote': 'https://storage.googleapis.com/wild-sight/web_model/model.json',
+  'local': 'http://localhost:8081/public/web_model/model.json'
+}
 let model
 
 
@@ -58,8 +60,7 @@ export default {
     },
 
     async loadCustomModel () {
-      global.fetch = require('node-fetch');
-      model = await tf.loadGraphModel(MODEL_URL)
+      model = await tf.loadGraphModel(MODEL_URLS["local"])
       this.isModelReady = true
       const zeros = tf.zeros([1, 3, 512, 512])
       const predictions = await model.executeAsync(zeros)
