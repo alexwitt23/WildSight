@@ -1,0 +1,37 @@
+model:
+  type: "detection"
+  backbone: "resnet34"
+  kwargs:
+    pretrained: false
+  img_size: [512, 512]  # [W, H]
+  num_classes: 2
+  fpn:
+    type: "retinanet"
+    num_channels: 128
+    use_dw: false
+    levels: [3, 4, 5, 6, 7]
+  retinanet_head:
+    num_levels: 4
+    use_dw: false
+  anchors:
+    aspect_ratios: [0.5, 1, 2]  # H / W
+    sizes: [32, 64, 128, 256, 512]
+    scales: [1.0, 1.25, 1.5]
+training:
+  optimizer:
+    type: "Ranger"
+    lr: 5.0e-4
+    momentum: 0.9
+    weight_decay: 0
+  lr_schedule:
+    start_lr: 5.0e-4
+    max_lr: 5.0e-4
+    end_lr: 1.0e-8
+    warmup_fraction: 0.72
+  epochs: 35
+  train_batch_size: 45
+  eval_batch_size: 45
+  eval_start_epoch: 10
+data:
+  name: "ENA"
+  data_path: "/home/alex/datasets/african_wildlife"
