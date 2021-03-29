@@ -3,7 +3,7 @@
 ## Model Download
 
 Download the trained model from [this](https://drive.google.com/file/d/1HPKMybFDaNlTEY2Az7kG9EgzA88YuC1B/view?usp=sharing)
-link. Extract the folder `web_model` and place it in `wild_sight/web`.
+link. Extract the folder `web_model` and place it in `wild_sight/web/public`.
 
 
 ## Project setup
