@@ -49,6 +49,8 @@ export default {
         let img = document.createElement('img');
         img.src = e.target.result;
         img.onload = () => {
+          this.imgWidth = img.width
+          this.imgHeight = img.height
           this.predict(img)
         };
       }
@@ -60,7 +62,9 @@ export default {
     },
 
     async loadCustomModel () {
-      model = await tf.loadGraphModel(MODEL_URLS["local"])
+      console.log(process.env.NODE_ENV)
+      let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
+      model = await tf.loadGraphModel(modelFilepath)
       this.isModelReady = true
       const zeros = tf.zeros([1, 3, 512, 512])
       const predictions = await model.executeAsync(zeros)
@@ -91,22 +95,18 @@ export default {
 
     renderPredictionBoxes (imgElement, bboxes) {
       let cvn = this.$refs.canvas;
-      cvn.width = 512;
-      cvn.height = 512;
+      cvn.width = this.imgWidth;
+      cvn.height = this.imgHeight;
       let ctx = cvn.getContext("2d");  
-      ctx.drawImage(imgElement, 0 ,0, 512, 512);
-      // clear the canvas
-      //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-      // draw results
-      //confidences = confidences.dataSync()
+      ctx.drawImage(imgElement, 0 ,0, this.imgWidth, this.imgHeight);
 
       for (var i = 0; i < bboxes.shape[0]; i++){
         let arr = bboxes.slice([i, 0], [1, -1]).toInt().dataSync()
         
-        const minX = arr[0]
-        const minY = arr[1]
-        const maxX = arr[2]
-        const maxY = arr[3]
+        const minX = arr[0] / 512 * this.imgWidth
+        const minY = arr[1] / 512 * this.imgHeight
+        const maxX = arr[2] / 512 * this.imgWidth
+        const maxY = arr[3] / 512 * this.imgHeight
         const score = 100
         if (score > 75) {
           ctx.beginPath()

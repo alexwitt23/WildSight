@@ -389,7 +389,7 @@ def create_data_loader(
     dataset_fn = dataset.__dict__[dataset_name]
 
     meta = pathlib.Path(
-        "/media/alex/Elements/gzgc.coco/annotations/instances_train2020.json"
+        "/home/alex/Downloads/whaleshark.coco/annotations/instances_train2020.json"
     )
     dataset_ = dataset_fn(
         data_dir=data_dir,
