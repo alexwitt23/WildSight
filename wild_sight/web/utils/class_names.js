@@ -1,4 +1,6 @@
-const SMALL_CLASS_NAMES = [
+const CLASS_NAMES = [
+    "whale",
     "giraffe",
-    "zebra",
-]
+    "zebra"
+];
+export default CLASS_NAMES

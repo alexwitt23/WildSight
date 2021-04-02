@@ -15,9 +15,10 @@
 import * as tf from '@tensorflow/tfjs'
 import { RetinaNetDecoder } from '../../utils/retinanet_decoder'
 import MainLayout from '../layouts/Main.vue'
+import CLASS_NAMES from "../../utils/class_names"
 const MODEL_URLS = {
-  'remote': 'https://storage.googleapis.com/wild-sight/web_model/model.json',
-  'local': 'http://localhost:8081/public/web_model/model.json'
+  'remote': 'https://storage.googleapis.com/wild-sight/2021-04-02T01.03.47/model.json',
+  'local': 'http://localhost:8081/public/2021-04-02T01.03.47/model.json'
 }
 let model
 
@@ -40,6 +41,8 @@ export default {
       model: null,
       resultWidth: 0,
       resultHeight: 0,
+      maxCanvasHeight: 800,
+      maxCanvasWidth: 1200
     }
   },
   methods: {
@@ -49,6 +52,20 @@ export default {
         let img = document.createElement('img');
         img.src = e.target.result;
         img.onload = () => {
+          let aspectRatio = img.width / img.height
+          if (img.width > this.maxCanvasWidth && aspectRatio >= 1) {
+            this.imgWidth = this.maxCanvasWidth
+            this.imgHeight = this.imgWidth / aspectRatio
+          }
+          else if (img.height > this.maxCanvasHeight) {
+            this.imgHeight = this.maxCanvasHeight
+            this.imgWidth = this.imgHeight / aspectRatio
+          }
+          else{
+            this.imgWidth = img.width
+            this.imgHeight = img.height
+          }
+          console.log(this.imgWidth, this.imgHeight, aspectRatio)
           this.predict(img)
         };
       }
@@ -60,7 +77,9 @@ export default {
     },
 
     async loadCustomModel () {
-      model = await tf.loadGraphModel(MODEL_URLS["local"])
+      console.log(process.env.NODE_ENV)
+      let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
+      model = await tf.loadGraphModel(modelFilepath)
       this.isModelReady = true
       const zeros = tf.zeros([1, 3, 512, 512])
       const predictions = await model.executeAsync(zeros)
@@ -81,9 +100,9 @@ export default {
       var predictions = await model.executeAsync(normalized)
       const regressions = predictions.slice([0, 0], [-1, 4])
       const class_logits = predictions.slice([0, 4], [-1, -1])
-      const [bboxes, confidences] = await this.decoder.get_boxes(class_logits, regressions)
+      const [classes, bboxes, confidences] = await this.decoder.get_boxes(class_logits, regressions)
       this.renderPredictionBoxes(imgElement, bboxes)
-      this.csvExport(confidences, bboxes)
+      this.csvExport(classes, confidences, bboxes)
       img.dispose()
       this.isResultReady = true
     return [confidences, bboxes]
@@ -91,22 +110,18 @@ export default {
 
     renderPredictionBoxes (imgElement, bboxes) {
       let cvn = this.$refs.canvas;
-      cvn.width = 512;
-      cvn.height = 512;
+      cvn.width = this.imgWidth;
+      cvn.height = this.imgHeight;
       let ctx = cvn.getContext("2d");  
-      ctx.drawImage(imgElement, 0 ,0, 512, 512);
-      // clear the canvas
-      //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-      // draw results
-      //confidences = confidences.dataSync()
+      ctx.drawImage(imgElement, 0 ,0, this.imgWidth, this.imgHeight);
 
       for (var i = 0; i < bboxes.shape[0]; i++){
         let arr = bboxes.slice([i, 0], [1, -1]).toInt().dataSync()
         
-        const minX = arr[0]
-        const minY = arr[1]
-        const maxX = arr[2]
-        const maxY = arr[3]
+        const minX = arr[0] / 512 * this.imgWidth
+        const minY = arr[1] / 512 * this.imgHeight
+        const maxX = arr[2] / 512 * this.imgWidth
+        const maxY = arr[3] / 512 * this.imgHeight
         const score = 100
         if (score > 75) {
           ctx.beginPath()
@@ -122,7 +137,7 @@ export default {
       }
     },
         // function to output csv, called by predict ()
-    csvExport(confidences, bboxes) {
+    csvExport(classes, confidences, bboxes) {
 
       //add headings to csv    
       this.csv = "Image,Class"
@@ -131,7 +146,7 @@ export default {
       for (var i = 0; i < bboxes.shape[0]; i++){
 
         this.csv += ','
-        var corners = ["Box"+String(i)+"_Confidence", "Box"+String(i)+"_X0", "Box"+String(i)+"_Y0", "Box"+String(i)+"_X1", "Box"+String(i)+"_Y1"]
+        var corners = ["class", "confidence", "x0", "y0", "x1", "y1"]
         this.csv += corners.join(',');
 
       }
@@ -147,7 +162,8 @@ export default {
         this.csv += ','      
         let arr = bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
         let con = confidences.slice([0]).toFloat().dataSync()
-        var row = [ con[i],arr[1],arr[0],arr[3],arr[2] ];
+        console.log(classes[i])
+        var row = [ CLASS_NAMES[classes[i]], con[i], arr[1], arr[0], arr[3], arr[2] ];
         this.csv += row.join(',');
 
       }
@@ -163,7 +179,7 @@ export default {
   },
   mounted () {
     this.initializeBackend()
-    this.decoder = new RetinaNetDecoder()
+    this.decoder = new RetinaNetDecoder(CLASS_NAMES.length)
     this.loadCustomModel()
   }
 }

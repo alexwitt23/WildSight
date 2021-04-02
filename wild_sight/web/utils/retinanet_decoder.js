@@ -1,10 +1,10 @@
 import * as tf from '@tensorflow/tfjs'
-import json from '../public/web_model/anchors.json'
+import json from '../public/anchors.json'
 
 
 class RetinaNetDecoder {
     constructor(
-        num_classes = 2,
+        num_classes = 1,
         score_threshold = 0.4,
         topk_candidates = 100,
         nms_threshold = 0.3,
@@ -34,6 +34,7 @@ class RetinaNetDecoder {
 
         // Gather the matched anchors. 
         const anchor_idxs = indices.floorDiv(this.num_classes)
+        const classes_idxs = indices.mod(this.num_classes)
         const anchors_topk = this.anchors.gather(anchor_idxs)
 
         // Get widths, heights, and centers of anchor boxes
@@ -65,7 +66,7 @@ class RetinaNetDecoder {
         const bboxes = predictions.gather(nms_keep)
         const confidences = values.gather(nms_keep)
         
-        return [bboxes, confidences]
+        return [classes_idxs, bboxes, confidences]
     }
 
 }

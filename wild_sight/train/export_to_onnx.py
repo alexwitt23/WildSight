@@ -61,16 +61,12 @@ def convert_model(timestamp: str) -> None:
     torch.onnx.export(
         RetinaNetWrapper(model),  # model being run
         x,  # model input (or a tuple for multiple inputs)
-        model.model_path
-        / "model.onnx",
+        model.model_path / "model.onnx",
         opset_version=12,
         do_constant_folding=True,
         input_names=["input"],
         output_names=["output"],
-        dynamic_axes={
-            "input": {0: "N"},
-            "output": {0: "N"},
-        },
+        dynamic_axes={"input": {0: "N"}, "output": {0: "N"},},
         export_params=True,
     )
     onnx_model = onnx.load(str(model.model_path / "model.onnx"))

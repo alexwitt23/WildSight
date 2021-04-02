@@ -121,7 +121,6 @@ def train(
         dataset_name=dataset_name,
     )
     img_size = model_cfg.get("img_size")
-    # Construct the optimizer and wrap with Apex if available.
     optimizer = utils.create_optimizer(train_cfg["optimizer"], model)
 
     # Adjust the model for distributed training. If we are using apex, wrap the model
@@ -346,7 +345,7 @@ def eval(
 
         improved = []
         for (metric, old), new in zip(previous_best.items(), metrics.values()):
-            if new > old:
+            if new >= old:
                 improved.append(metric)
                 previous_best[metric] = new
 
@@ -388,21 +387,20 @@ def create_data_loader(
     assert dataset_name in dataset.__dict__, f"Can't find dataset: {dataset_name}"
     dataset_fn = dataset.__dict__[dataset_name]
 
-    meta = pathlib.Path(
-        "/media/alex/Elements/gzgc.coco/annotations/instances_train2020.json"
-    )
+    meta = pathlib.Path(data_dir / "annotations.json")
     dataset_ = dataset_fn(
-        data_dir=data_dir,
+        data_dir=data_dir / "images",
         metadata_path=meta,
         img_width=512,
         img_height=512,
         validation=val,
     )
+    print(dataset_)
     # If using distributed training, use a DistributedSampler to load exclusive sets
     # of data per process.
     sampler = None
     if world_size > 1:
-        sampler = torch.utils.data.DistributedSampler(dataset_, shuffle=val)
+        sampler = torch.utils.data.DistributedSampler(dataset_, shuffle=~val)
 
     if val:
         collate_fn = collate.CollateVal()
