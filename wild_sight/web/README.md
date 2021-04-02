@@ -45,5 +45,5 @@ yarn lint
 
 ## Heroku
 ```
-git push heroku main
+git push heroku `git subtree split --prefix wild_sight/web main`:main --force
 ```
