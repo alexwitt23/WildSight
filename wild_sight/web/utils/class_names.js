@@ -1,4 +1,6 @@
 const CLASS_NAMES = [
-    "whale"
+    "whale",
+    "giraffe",
+    "zebra"
 ];
 export default CLASS_NAMES

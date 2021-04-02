@@ -18,7 +18,7 @@ import MainLayout from '../layouts/Main.vue'
 import CLASS_NAMES from "../../utils/class_names"
 const MODEL_URLS = {
   'remote': 'https://storage.googleapis.com/wild-sight/2021-04-02T01.03.47/model.json',
-  'local': 'http://localhost:8081/public/web_model/model.json'
+  'local': 'http://localhost:8081/public/2021-04-02T01.03.47/model.json'
 }
 let model
 
