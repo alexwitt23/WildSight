@@ -1,10 +1,10 @@
 <template>
   <main-layout>
   </main-layout>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
   <div class="container">
-    <img v-bind:src="imageSrc" class="background-img"/>
-    <div class="centered-text">WildSight</div>
-    <div class="subtitle">Conservation accelerated with AI</div>
+    <h1 class="text-center display-1">WildSight</h1>
+    <h3 class="text-center">Conservation accelerated with AI</h3>
   </div>
 </template>
 
@@ -13,39 +13,6 @@ import MainLayout from '../layouts/Main.vue'
 export default {
   components: {
     MainLayout
-  },
-  data() {
-    return {
-      imageSrc: "https://user-images.githubusercontent.com/31543169/111704559-565fbf80-880d-11eb-99d1-118a40bfd014.jpg"
-    }
-    
   }
 }
 </script>
-
-<style lang="scss">
-.container {
-  position: relative;
-  text-align: center;
-  color: white;
-}
-.background-img {
-  width: 100%;
-}
-.centered-text {
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 60px;
-  color: green;
-}
-.subtitle {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 20px;
-  color: green;
-}
-</style>
