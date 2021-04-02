@@ -121,7 +121,6 @@ def train(
         dataset_name=dataset_name,
     )
     img_size = model_cfg.get("img_size")
-    # Construct the optimizer and wrap with Apex if available.
     optimizer = utils.create_optimizer(train_cfg["optimizer"], model)
 
     # Adjust the model for distributed training. If we are using apex, wrap the model
@@ -401,7 +400,7 @@ def create_data_loader(
     # of data per process.
     sampler = None
     if world_size > 1:
-        sampler = torch.utils.data.DistributedSampler(dataset_, shuffle=val)
+        sampler = torch.utils.data.DistributedSampler(dataset_, shuffle=~val)
 
     if val:
         collate_fn = collate.CollateVal()

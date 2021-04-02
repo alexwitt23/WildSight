@@ -1,5 +1,5 @@
 import * as tf from '@tensorflow/tfjs'
-import json from '../public/web_model/anchors.json'
+import json from '../public/anchors.json'
 
 
 class RetinaNetDecoder {
