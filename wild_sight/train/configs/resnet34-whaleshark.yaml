@@ -4,7 +4,7 @@ model:
   kwargs:
     pretrained: false
   img_size: [512, 512]  # [W, H]
-  num_classes: 1
+  num_classes: 3
   fpn:
     type: "retinanet"
     num_channels: 128
@@ -31,7 +31,7 @@ training:
   epochs: 35
   train_batch_size: 55
   eval_batch_size: 55
-  eval_start_epoch: 10
+  eval_start_epoch: 0
 data:
   name: "WhaleShark"
-  data_path: "/home/alex/Downloads/whaleshark.coco/images/train2020"
+  data_path: "/tmp/new-coco"

@@ -255,7 +255,7 @@ class WhaleShark(torch.utils.data.Dataset):
         super().__init__()
         self.meta_data = json.loads(metadata_path.read_text())
 
-        self.images = list(data_dir.glob(f"*.jpg"))
+        self.images = list(data_dir.rglob("*.jpg"))
         assert self.images, f"No images found in {data_dir}."
 
         self.img_height = img_height
@@ -294,11 +294,8 @@ class WhaleShark(torch.utils.data.Dataset):
         self.len = len(self.images)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        image = None
-        while image is None:
-            image_data = self.images[self.ids_map[idx]]
-            image = cv2.imread(str(image_data["file_name"]))
-            idx = random.choice(range(self.__len__()))
+        image_data = self.images[self.ids_map[idx]]
+        image = cv2.imread(str(image_data["file_name"]))
 
         boxes = []
         category_ids = []

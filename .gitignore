@@ -6,6 +6,8 @@ __pycache__
 *.png
 
 
+web_model*
+
 # Dependencies
 public/onnx-wasm.wasm
 public/onnx-worker.js
