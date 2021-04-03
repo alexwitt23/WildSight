@@ -1,12 +1,16 @@
 <template>
-  <main-layout>
+  <main-layout></main-layout>
+  <div class="container">
+    <h1>Demo</h1>
     <h3 v-if="!isModelReady && !initFailMessage">loading model ...</h3>
     <h3 v-if="initFailMessage">Failed to init stream and/or model - {{ initFailMessage }}</h3>
-    <input v-if="isModelReady" type="file" accept="image/*" @change="uploadImage($event)" id="file-input">
+    <div class="uploadBox">
+      <input v-if="isModelReady" type="file" accept="image/*" @change="uploadImage($event)" id="file-input">
+    </div>
     <canvas ref="canvas"></canvas>
-  </main-layout>
-  <div id="#results" v-if="isResultReady">
-    <button v-on:click="downloadResults()">Download Results</button>
+    <div id="#results" v-if="isResultReady">
+      <button v-on:click="downloadResults()">Download Results</button>
+    </div>
   </div>
 </template>
 
@@ -188,6 +192,16 @@ export default {
 <style lang="scss">
 body {
   margin: 0;
+}
+.container {
+  .h1 {
+    color: black;
+  }
+  text-align: center;
+  align-content: center;
+  .uploadBox {
+    align-content: center;
+  }
 }
 .resultFrame {
   display: grid;
