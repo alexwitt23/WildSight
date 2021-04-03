@@ -2,7 +2,7 @@
   <main-layout>
     <h3 v-if="!isModelReady && !initFailMessage">loading model ...</h3>
     <h3 v-if="initFailMessage">Failed to init stream and/or model - {{ initFailMessage }}</h3>
-    <input v-if="isModelReady" type="file" accept="image/*" @change="uploadImage($event)" id="file-input">
+    <input v-if="isModelReady" type="file" multiple accept="image/*" @change="uploadImage($event)" id="file-input">
     <canvas ref="canvas"></canvas>
   </main-layout>
   <div id="#results" v-if="isResultReady">
@@ -47,29 +47,37 @@ export default {
   },
   methods: {
     uploadImage(event) {
-      let reader = new FileReader();
-      reader.onload = e => {
-        let img = document.createElement('img');
-        img.src = e.target.result;
-        img.onload = () => {
-          let aspectRatio = img.width / img.height
-          if (img.width > this.maxCanvasWidth && aspectRatio >= 1) {
-            this.imgWidth = this.maxCanvasWidth
-            this.imgHeight = this.imgWidth / aspectRatio
-          }
-          else if (img.height > this.maxCanvasHeight) {
-            this.imgHeight = this.maxCanvasHeight
-            this.imgWidth = this.imgHeight / aspectRatio
-          }
-          else{
-            this.imgWidth = img.width
-            this.imgHeight = img.height
-          }
-          console.log(this.imgWidth, this.imgHeight, aspectRatio)
-          this.predict(img)
-        };
+
+      // initialize variables for csv
+      this.csvInit()
+
+      // iterate through input files
+      for (let fl of event.target.files) {
+
+        let reader = new FileReader();
+        reader.onload = e => {
+          let img = document.createElement('img');
+          img.src = e.target.result;
+          img.onload = () => {
+            let aspectRatio = img.width / img.height
+            if (img.width > this.maxCanvasWidth && aspectRatio >= 1) {
+              this.imgWidth = this.maxCanvasWidth
+              this.imgHeight = this.imgWidth / aspectRatio
+            }
+            else if (img.height > this.maxCanvasHeight) {
+              this.imgHeight = this.maxCanvasHeight
+              this.imgWidth = this.imgHeight / aspectRatio
+            }
+            else{
+              this.imgWidth = img.width
+              this.imgHeight = img.height
+            }
+            console.log(this.imgWidth, this.imgHeight, aspectRatio)
+            this.predict(img)
+          };
+        }
+        reader.readAsDataURL(fl);
       }
-      reader.readAsDataURL(event.target.files[0]);
     },
 
     async initializeBackend() {
@@ -136,25 +144,31 @@ export default {
         }
       }
     },
-        // function to output csv, called by predict ()
+    // function to set up initial headings for csv file
+    csvInit(){
+
+      this.header = 'Image'   // initilize header string
+      this.csv    = ''        // initialize csv string
+      this.cls    = ''        // class designation
+      this.inm    = 0         // image number
+      this.mbx    = 0         // number of boxes currently listed in the header string
+
+    },
+    // function to output csv, called by predict ()
     csvExport(classes, confidences, bboxes) {
 
-      //add headings to csv    
-      this.csv = "Image,Class"
+      //add any box specific headings not already added
+      for (var i = this.mbx; i < bboxes.shape[0]; i++){
 
-      //add box specific headings
-      for (var i = 0; i < bboxes.shape[0]; i++){
-
-        this.csv += ','
-        var corners = ["class", "confidence", "x0", "y0", "x1", "y1"]
-        this.csv += corners.join(',');
+        this.header += ','
+        var corners  = ["class", "confidence", "x0", "y0", "x1", "y1"]
+        this.header += corners.join(',');
 
       }
-      this.csv += "\n"
+      if (this.mbx < bboxes.shape[0]) {this.mbx = bboxes.shape[0];} 
 
-      //Input values for image and class
-      this.csv += "0,0"
-
+      //Input image identifier
+      this.csv += this.inm
 
       //add confidence and bounding box data for each box
       for (i = 0; i < bboxes.shape[0]; i++){
@@ -167,11 +181,16 @@ export default {
         this.csv += row.join(',');
 
       }
+
       this.csv += "\n"
+      this.inm++
+
     },
     downloadResults () {
+      var out = this.header + "\n" + this.csv
+
       const anchor = document.createElement('a');
-      anchor.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(this.csv);
+      anchor.href = 'data:text/csv;charset=utf0-8,' + encodeURIComponent(out);
       anchor.target = '_blank';
       anchor.download = 'wildlife_results.csv';   // we should make the naming more sophisticated 
       anchor.click();
