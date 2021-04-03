@@ -24,10 +24,19 @@ export default {
 </script>
 
 <style lang="scss">
+body, html {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  min-height: 100vh;
+}
+body {
+  background-color: rgb(63, 63, 63);
+}
 .container {
   position: relative;
   text-align: center;
-  color: white;
+  color: rgb(63, 63, 63);
 }
 .background-img {
   width: 100%;

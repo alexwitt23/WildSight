@@ -2,13 +2,19 @@
   <main-layout></main-layout>
   <div class="container">
     <h1>Demo</h1>
+    <p>
+      The demo is a chance to show our models' capabilities. Below you can select which
+      animals you'd like to have the model find. Grad a picture(s) you'd like to run the
+      model on and checkout the results. The exact results can be downloaded in a CSV file.
+    </p>
     <h3 v-if="!isModelReady && !initFailMessage">loading model ...</h3>
     <h3 v-if="initFailMessage">Failed to init stream and/or model - {{ initFailMessage }}</h3>
+
+    <canvas ref="canvas"></canvas>
     <div class="uploadBox">
       <input v-if="isModelReady" type="file" accept="image/*" @change="uploadImage($event)" id="file-input">
     </div>
-    <canvas ref="canvas"></canvas>
-    <div id="#results" v-if="isResultReady">
+    <div class="download" id="#results" v-if="isResultReady">
       <button v-on:click="downloadResults()">Download Results</button>
     </div>
   </div>
@@ -114,6 +120,7 @@ export default {
 
     renderPredictionBoxes (imgElement, bboxes) {
       let cvn = this.$refs.canvas;
+      console.log(window.innerWidth);
       cvn.width = this.imgWidth;
       cvn.height = this.imgHeight;
       let ctx = cvn.getContext("2d");  
@@ -226,4 +233,9 @@ body {
 .canvas-wrapper {
   position: relative;
 }
+
+.download {
+  padding-top: 50px;
+}
+
 </style>
