@@ -1,11 +1,15 @@
 <template>
   <main-layout>
   </main-layout>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-  <div class="container">
-    <h1 class="text-center display-1">WildSight</h1>
-    <h3 class="text-center">Conservation accelerated with AI</h3>
+  <div class="cover">  
+   <div class="container">
+      <div class="row">
+        <h1 class="text-center display-1 mt-5 title">WildSight</h1>
+        <h3 class="text-center">Accelerating conservation with AI.</h3>
+      </div>
+    </div>   
   </div>
+
 </template>
 
 <script>
