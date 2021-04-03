@@ -156,7 +156,7 @@ export default {
     },
     // function to output csv, called by predict ()
     csvExport(classes, confidences, bboxes) {
-
+      
       //add any box specific headings not already added
       for (var i = this.mbx; i < bboxes.shape[0]; i++){
 
@@ -176,8 +176,9 @@ export default {
         this.csv += ','      
         let arr = bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
         let con = confidences.slice([0]).toFloat().dataSync()
-        console.log(classes[i])
-        var row = [ CLASS_NAMES[classes[i]], con[i], arr[1], arr[0], arr[3], arr[2] ];
+        let cls = classes.slice([0]).toFloat().dataSync();
+        
+        var row = [String(CLASS_NAMES[cls[i]]), con[i], arr[1], arr[0], arr[3], arr[2] ];
         this.csv += row.join(',');
 
       }
