@@ -9,6 +9,8 @@ import albumentations as albu
 def det_train_augs(height: int, width: int) -> albu.Compose:
     return albu.Compose(
         [
+            albu.Rotate(45),
+            albu.RandomResizedCrop(512, 512, p=0.75),
             albu.Resize(height=height, width=width),
             albu.ColorJitter(),
             albu.RandomGamma(),

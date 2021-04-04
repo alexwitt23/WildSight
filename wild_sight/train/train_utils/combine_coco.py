@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""A script to combine COCO datasets into one."""
+"""A script to combine COCO datasets into one.
+
+./wild_sight/train/train_utils/combine_coco.py \
+    --coco_metadata_path "/home/alex/Downloads/whaleshark.coco/annotations/instances_train2020.json,/media/alex/Elements/gzgc.coco/annotations/instances_train2020.json" \
+    --coco_image_dirs "/home/alex/Downloads/whaleshark.coco/images/train2020,/media/alex/Elements/gzgc.coco/images/train2020" \ 
+    --save_dir /tmp/new-coco
+
+"""
 
 import argparse
 import pathlib
