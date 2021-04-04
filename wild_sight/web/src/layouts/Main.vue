@@ -1,12 +1,14 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <nav class="navbar navbar-dark bg-dark flex-wrap">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/">WildSight</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler flex-grow-sm-1 flex-grow-0 me-2"
+      type="button" data-bs-toggle="collapse" data-bs-target="#navbar5">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav">
+
+      <a class="navbar-brand flex-grow-1" href="/">WildSight</a>
+     <div class="navbar-collapse collapse flex-grow-1 justify-content-center" id="navbar5">
+        <ul class="navbar-nav mx-auto">
           <li class="nav-item nav-link">
             <v-link href="/">Home</v-link>
           </li>
@@ -18,9 +20,12 @@
           </li>
         </ul>
       </div>
+        <div class="flex-grow-1">
+            <!--spacer-->
+        </div>
     </div>
   </nav>
-  <slot></slot>
+  
 </template>
 
 <script>
@@ -33,3 +38,21 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+@media (min-width: 768px) {
+.navbar-brand.abs
+    {
+        position: absolute;
+        width: 100%;
+        left: 0;
+        text-align: center;
+    }
+}
+.navbar-toggler:focus,
+.navbar-toggler:active,
+.navbar-toggler-icon:focus {
+    outline: none;
+    box-shadow: none;
+}
+</style>

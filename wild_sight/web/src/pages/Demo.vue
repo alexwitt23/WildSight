@@ -4,7 +4,7 @@
     <h1>Demo</h1>
     <p>
       The demo is a chance to show our models' capabilities. Below you can select which
-      animals you'd like to have the model find. Grad a picture(s) you'd like to run the
+      animals you'd like to have the model find. Grab a picture(s) you'd like to run the
       model on and checkout the results. The exact results can be downloaded in a CSV file.
     </p>
     <h3 v-if="!isModelReady && !initFailMessage">loading model ...</h3>
@@ -79,7 +79,6 @@ export default {
               this.imgWidth = img.width
               this.imgHeight = img.height
             }
-            console.log(this.imgWidth, this.imgHeight, aspectRatio)
             this.predict(img)
           };
         }
@@ -92,7 +91,6 @@ export default {
     },
 
     async loadCustomModel () {
-      console.log(process.env.NODE_ENV)
       let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
       model = await tf.loadGraphModel(modelFilepath)
       this.isModelReady = true
@@ -125,7 +123,6 @@ export default {
 
     renderPredictionBoxes (imgElement, bboxes) {
       let cvn = this.$refs.canvas;
-      console.log(window.innerWidth);
       cvn.width = this.imgWidth;
       cvn.height = this.imgHeight;
       let ctx = cvn.getContext("2d");  
@@ -155,7 +152,7 @@ export default {
     // function to set up initial headings for csv file
     csvInit(){
 
-      this.header = 'Image'   // initilize header string
+      this.header = ["Image", "class", "confidence", "x0", "y0", "x1", "y1"].join(',');   // initilize header string
       this.csv    = ''        // initialize csv string
       this.cls    = ''        // class designation
       this.inm    = 0         // image number
@@ -165,32 +162,26 @@ export default {
     // function to output csv, called by predict ()
     csvExport(classes, confidences, bboxes) {
       
-      //add any box specific headings not already added
-      for (var i = this.mbx; i < bboxes.shape[0]; i++){
-
-        this.header += ','
-        var corners  = ["class", "confidence", "x0", "y0", "x1", "y1"]
-        this.header += corners.join(',');
-
-      }
-      if (this.mbx < bboxes.shape[0]) {this.mbx = bboxes.shape[0];} 
+      if (this.mbx < bboxes.shape[0]) {
+        this.mbx = bboxes.shape[0];
+      } 
 
       //Input image identifier
       this.csv += this.inm
 
       //add confidence and bounding box data for each box
-      for (i = 0; i < bboxes.shape[0]; i++){
+      for (var i = 0; i < bboxes.shape[0]; i++){
 
         this.csv += ','      
         let arr = bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
         let con = confidences.slice([0]).toFloat().dataSync()
         let cls = classes.slice([0]).toFloat().dataSync();
-        
+        console.log(cls)
         var row = [String(CLASS_NAMES[cls[i]]), con[i], arr[1], arr[0], arr[3], arr[2] ];
         this.csv += row.join(',');
+        this.csv += "\n"
 
       }
-
       this.csv += "\n"
       this.inm++
 

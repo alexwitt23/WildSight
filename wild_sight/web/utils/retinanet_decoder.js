@@ -34,7 +34,7 @@ class RetinaNetDecoder {
 
         // Gather the matched anchors. 
         const anchor_idxs = indices.floorDiv(this.num_classes)
-        const classes_idxs = indices.mod(this.num_classes)
+        let classes_idxs = indices.mod(this.num_classes)
         const anchors_topk = this.anchors.gather(anchor_idxs)
 
         // Get widths, heights, and centers of anchor boxes
@@ -65,6 +65,7 @@ class RetinaNetDecoder {
         )
         const bboxes = predictions.gather(nms_keep)
         const confidences = values.gather(nms_keep)
+        classes_idxs = classes_idxs.gather(nms_keep)
         
         return [classes_idxs, bboxes, confidences]
     }
