@@ -1,14 +1,11 @@
 <template>
   <main-layout>
   </main-layout>
-  <h2>About Us</h2>
-  <p>
-    This project was created as part of a senior design class at UT Austin.
-    The goal is to empower biological conservationists with the power to accelerate
-    their studies with AI. Our application delivers a deep neural network capable of
-    detecting various classes of animals.
-  </p>
-  
+    <div class="cover2">
+        <div class="container">
+            <h1 class="display-1 mt-5 text-center">About</h1>
+        </div>
+    </div>
 </template>
 
 <script>

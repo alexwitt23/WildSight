@@ -1,15 +1,30 @@
-<template>
-  <main-layout></main-layout>
-  <div class="container">
-    <h1>Demo</h1>
-    <h3 v-if="!isModelReady && !initFailMessage">loading model ...</h3>
-    <h3 v-if="initFailMessage">Failed to init stream and/or model - {{ initFailMessage }}</h3>
-    <input v-if="isModelReady" type="file" multiple accept="image/*" @change="uploadImage($event)" id="file-input">
-    <canvas ref="canvas"></canvas>
-    <div id="#results" v-if="isResultReady">
-      <button v-on:click="downloadResults()">Download Results</button>
+<template> 
+    <main-layout>
+      <div class="row">
+         <h1 class="display-1 mt-5 text-center">Demo</h1>  
+       </div>
+       <div class="row">
+         <div class="col">
+           <div class="spinner-border text-success text-center m-auto d-block mt-5" role="status" v-if='!isModelReady && !initFailMessage'>
+            <span class="visually-hidden">Loading model...</span>
+           </div>
+          <h4 class="text-center loading" v-if="!isModelReady && !initFailMessage">Loading model...</h4>
+        </div>
+      </div>
+      <div class="row">
+         <h3 v-if="initFailMessage">Failed to init stream and/or model - {{ initFailMessage }}</h3>
+       </div>
+       <div class="row mt-5">
+         <div class="col-xs-6 col-xs-offset-3">
+          <input name="file" v-if="isModelReady" type="file" accept="image/*" @change="uploadImage($event)" id="file-input">
+           <canvas ref="canvas" class="mt-5 pb-5"></canvas>
+        </div>
+      </div>
+    </main-layout>
+       
+    <div id="#results" v-if="isResultReady" class="mt-5 pb-5">
+      <button v-on:click="downloadResults()" class="button btn">Download Results</button>
     </div>
-  </div>
 </template>
 
 <script>
@@ -208,6 +223,7 @@ export default {
 </script>
 
 <style lang="scss">
+<<<<<<< HEAD
 body {
   margin: 0;
 }
@@ -221,6 +237,8 @@ body {
     align-content: center;
   }
 }
+=======
+>>>>>>> dd2d43a63fdbdd768d5ac76cada44ab9a29703a5
 .resultFrame {
   display: grid;
   video {
@@ -231,14 +249,9 @@ body {
   }
 }
 .canvas-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   pointer-events: none;
-  width: 100%;
-  height: 100%
+  width: 50%;
+  height: 50%
 }
 
 .canvas-wrapper {

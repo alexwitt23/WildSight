@@ -1,5 +1,7 @@
 import { createApp, h } from 'vue'
 import routes from './routes'
+import '@/css/styles.scss';
+
 
 const SimpleRouterApp = {
   data: () => ({

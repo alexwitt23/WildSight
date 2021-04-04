@@ -1,11 +1,15 @@
 <template>
   <main-layout>
   </main-layout>
-  <div class="container">
-    <img v-bind:src="imageSrc" class="background-img"/>
-    <div class="centered-text">WildSight</div>
-    <div class="subtitle">Conservation accelerated with AI</div>
+  <div class="cover">  
+   <div class="container">
+      <div class="row">
+        <h1 class="text-center display-1 mt-5 title">WildSight</h1>
+        <h3 class="text-center">Accelerating conservation with AI.</h3>
+      </div>
+    </div>   
   </div>
+
 </template>
 
 <script>
@@ -13,39 +17,6 @@ import MainLayout from '../layouts/Main.vue'
 export default {
   components: {
     MainLayout
-  },
-  data() {
-    return {
-      imageSrc: "https://user-images.githubusercontent.com/31543169/111704559-565fbf80-880d-11eb-99d1-118a40bfd014.jpg"
-    }
-    
   }
 }
 </script>
-
-<style lang="scss">
-.container {
-  position: relative;
-  text-align: center;
-  color: white;
-}
-.background-img {
-  width: 100%;
-}
-.centered-text {
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 60px;
-  color: green;
-}
-.subtitle {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 20px;
-  color: green;
-}
-</style>
