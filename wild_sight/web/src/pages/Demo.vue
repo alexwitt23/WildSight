@@ -223,22 +223,6 @@ export default {
 </script>
 
 <style lang="scss">
-<<<<<<< HEAD
-body {
-  margin: 0;
-}
-.container {
-  .h1 {
-    color: black;
-  }
-  text-align: center;
-  align-content: center;
-  .uploadBox {
-    align-content: center;
-  }
-}
-=======
->>>>>>> dd2d43a63fdbdd768d5ac76cada44ab9a29703a5
 .resultFrame {
   display: grid;
   video {
