@@ -391,8 +391,8 @@ def create_data_loader(
     dataset_ = dataset_fn(
         data_dir=data_dir / "images",
         metadata_path=meta,
-        img_width=512,
-        img_height=512,
+        img_width=image_size[1],
+        img_height=image_size[0],
         validation=val,
     )
     print(dataset_)
