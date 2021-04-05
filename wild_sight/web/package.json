@@ -14,7 +14,8 @@
     "@tensorflow/tfjs": "^3.3.0",
     "@tensorflow/tfjs-node": "^3.3.0",
     "aws-sdk": "^2.874.0",
-    "bootstrap": "^5.0.0",
+    "bootstrap": "^5.0.0-beta3",
+    "css-loader": "^5.2.0",
     "node-static": "^0.7.11",
     "vue": "^3.0.0",
     "vue-router": "^3.5.1"
