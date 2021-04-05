@@ -164,33 +164,24 @@ export default {
     // function to set up initial headings for csv file
     csvInit(){
       // initilize header string
-      this.header = ["class", "confidence", "x0", "y0", "x1", "y1"].join(',');
+      this.header = ["image", "class", "confidence", "x0", "y0", "x1", "y1"].join(',');
       this.csv    = ''        // initialize csv string
-      this.cls    = ''        // class designation
       this.inm    = 0         // image number
-      this.mbx    = 0         // number of boxes currently listed in the header string
 
     },
     // function to output csv, called by predict ()
     csvExport(classes, confidences, bboxes) {
-      
-      if (this.mbx < bboxes.shape[0]) {
-        this.mbx = bboxes.shape[0];
-      } 
-
-      //Input image identifier
-      this.csv += this.inm
 
       //add confidence and bounding box data for each box
       for (var i = 0; i < bboxes.shape[0]; i++){
-
-        this.csv += ','      
+    
         let arr = bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
         let con = confidences.slice([0]).toFloat().dataSync()
         let cls = classes.slice([0]).toFloat().dataSync();
         
-        var row = [String(CLASS_NAMES[cls[i]]), con[i], arr[0], arr[1], arr[2], arr[3]];
+        var row = [String(this.inm), String(CLASS_NAMES[cls[i]]), con[i], arr[0], arr[1], arr[2], arr[3]];
         this.csv += row.join(',');
+        this.csv += "\n"
 
       }
 
