@@ -16,7 +16,7 @@
        </div>
        <div class="row mt-5">
          <div class="col-xs-6 col-xs-offset-3">
-          <input name="file" v-if="isModelReady" type="file" accept="image/*" @change="uploadImage($event)" id="file-input">
+          <input name="file" v-if="isModelReady" type="file" multiple accept="image/*" @change="uploadImage($event)" id="file-input">
            <canvas ref="canvas" class="mt-5 pb-5"></canvas>
         </div>
       </div>
@@ -59,7 +59,9 @@ export default {
       resultWidth: 0,
       resultHeight: 0,
       maxCanvasHeight: 800,
-      maxCanvasWidth: 1200
+      maxCanvasWidth: 1200,
+      filenames: [],
+      time: 0
     }
   },
   methods: {
@@ -71,9 +73,12 @@ export default {
       // iterate through input files
       for (let fl of event.target.files) {
 
+        this.filenames.push( fl.name );
+       
         let reader = new FileReader();
         reader.onload = e => {
           let img = document.createElement('img');
+          
           img.src = e.target.result;
           img.onload = () => {
             let aspectRatio = img.width / img.height
@@ -89,12 +94,14 @@ export default {
               this.imgWidth = img.width
               this.imgHeight = img.height
             }
+            
             console.log(this.imgWidth, this.imgHeight, aspectRatio)
             this.predict(img)
           };
         }
         reader.readAsDataURL(fl);
       }
+      
     },
 
     async initializeBackend() {
@@ -116,13 +123,23 @@ export default {
     },
 
     async predict(imgElement){
+      //console.log(imgElement)
       const img = tf.browser.fromPixels(imgElement).resizeBilinear([512, 512]).toFloat().expandDims(0).transpose([0, 3, 1, 2])
       
       const mean = tf.tensor([0.485, 0.456, 0.406]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       const std = tf.tensor([0.229, 0.224, 0.225]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       
       const normalized = img.sub(mean).div(std)
+
+      //timing variable
+      var start = new Date();
       var predictions = await model.executeAsync(normalized)
+      //timing variable
+      var end   = new Date();
+      var difference = new Date();
+      difference.setTime(end.getTime() - start.getTime());
+      this.time += difference.getMilliseconds(); 
+
       const regressions = predictions.slice([0, 0], [-1, 4])
       const class_logits = predictions.slice([0, 4], [-1, -1])
       const [classes, bboxes, confidences] = await this.decoder.get_boxes(class_logits, regressions)
@@ -184,8 +201,8 @@ export default {
       }
       if (this.mbx < bboxes.shape[0]) {this.mbx = bboxes.shape[0];} 
 
-      //Input image identifier
-      this.csv += this.inm
+      //Add image name to csv
+      this.csv += this.filenames[this.inm];
 
       //add confidence and bounding box data for each box
       for (i = 0; i < bboxes.shape[0]; i++){
@@ -205,6 +222,9 @@ export default {
 
     },
     downloadResults () {
+      // print average processing time to console   
+      console.log('Average processing time: ' + String(this.time/this.inm) + ' milliseconds' )
+      
       var out = this.header + "\n" + this.csv
 
       const anchor = document.createElement('a');
