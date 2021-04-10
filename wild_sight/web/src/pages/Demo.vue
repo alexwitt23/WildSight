@@ -5,6 +5,12 @@
        </div>
        <div class="row">
          <div class="col">
+           <div closs="col-5">
+            <p class="text-center">
+             The model's power is showcased here. Grab some pictures of a zebra, giraffe, or
+             whale shark.
+            </p>
+            </div>
            <div class="spinner-border text-success text-center m-auto d-block mt-5" role="status" v-if='!isModelReady && !initFailMessage'>
             <span class="visually-hidden">Loading model...</span>
            </div>
@@ -34,8 +40,11 @@ import { RetinaNetDecoder } from '../../utils/retinanet_decoder'
 import MainLayout from '../layouts/Main.vue'
 import CLASS_NAMES from "../../utils/class_names"
 const MODEL_URLS = {
-  'remote': 'https://storage.googleapis.com/wild-sight/2021-04-02T01.03.47/model.json',
-  'local': 'http://localhost:8081/public/2021-04-07T13.19.08/model.json'
+  //'local': 'https://storage.googleapis.com/wild-sight/2021-04-02T01.03.47/model.json',
+  //'remote': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
+  //'local': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
+  'local': 'http://localhost:8080/public/2021-04-07T13.19.08/model.json',
+  'remote': 'http://localhost:8080/public/2021-04-07T13.19.08/model.json'
 }
 let model
 
@@ -111,7 +120,8 @@ export default {
     async loadCustomModel () {
       console.log(process.env.NODE_ENV)
       let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
-      model = await tf.loadGraphModel(modelFilepath)
+
+      model = await tf.loadGraphModel(modelFilepath )
       this.isModelReady = true
       const zeros = tf.zeros([1, 3, 512, 512])
       const predictions = await model.executeAsync(zeros)
@@ -189,23 +199,25 @@ export default {
     // function to output csv, called by predict ()
     csvExport(classes, confidences, bboxes) {
 
-      //Add image name to csv
-      this.csv += this.filenames[this.inm];
-
-      //add confidence and bounding box data for each box
+      // add confidence and bounding box data for each box
       for (var i = 0; i < bboxes.shape[0]; i++){
     
         let arr = bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
         let con = confidences.slice([0]).toFloat().dataSync()
         let cls = classes.slice([0]).toFloat().dataSync();
         
-        var row = [String(this.inm), String(CLASS_NAMES[cls[i]]), con[i], arr[0], arr[1], arr[2], arr[3]];
+        var row = [
+          this.filenames[this.inm],
+          String(CLASS_NAMES[cls[i]]),
+          con[i],
+          arr[0],
+          arr[1],
+          arr[2],
+          arr[3]
+        ];
         this.csv += row.join(',');
         this.csv += "\n"
-
       }
-
-      this.csv += "\n"
       this.inm++
 
     },
