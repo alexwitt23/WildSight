@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""A script to combine COCO datasets into one."""
+"""A script to combine COCO datasets into one.
+
+./wild_sight/train/train_utils/combine_coco.py \
+    --coco_metadata_path "~/Downloads/whaleshark.coco/annotations/instances_train2020.json,/media/alex/Elements/gzgc.coco/annotations/instances_train2020.json,/home/alex/datasets/coco/instances_train2017.json,/home/alex/datasets/coco/instances_val2017.json" \
+    --coco_image_dirs "~/Downloads/whaleshark.coco/images/train2020,/media/alex/Elements/gzgc.coco/images/train2020,/home/alex/datasets/coco/images/train2017,/home/alex/datasets/coco/images/val2017" \
+    --save_dir ~/datasets/whale-giraffe-zebra-coco
+"""
 
 import argparse
 import pathlib
@@ -7,6 +13,9 @@ import json
 import shutil
 from typing import List
 
+
+CLASSES = {"zebra": False, "giraffe": False, "rhincodon_typus": False}
+CATEGORIES = []
 
 def merge_datasets(
     metadata_paths: List[pathlib.Path],
@@ -16,20 +25,33 @@ def merge_datasets(
     images = []
     annotations = []
     categories = []
+
+    image_dirs_label = []
     for label_path, image_dir in zip(metadata_paths, image_dirs):
         new_image_dir = save_dir / "images" / image_dir.parent.parent.name
         new_image_dir.mkdir(exist_ok=True, parents=True)
-        metadata = json.loads(label_path.read_text())
+        metadata = json.loads(label_path.expanduser().read_text())
         image_id_offset = len(images)
         category_id_offset = len(categories)
-
+        image_dirs_label.append(image_dir)
         internal_category_map = {}
-        for category in metadata["categories"]:
-            new_id = category["id"] + category_id_offset
-            internal_category_map[category["id"]] = new_id
-            category["id"] = new_id
-            categories.append(category)
+        for category in metadata.get("categories", []):
+            for data_class in CLASSES:
+                if data_class in category["name"]:
+                    if not CLASSES[data_class]:
+                        new_id = category["id"] + category_id_offset
+                        internal_category_map[category["id"]] = new_id
+                        category["id"] = new_id
+                        categories.append(category)
+                        CATEGORIES.append(data_class)
+                        CLASSES[data_class] = True
+                    else:
+                        internal_category_map[category["id"]] = CATEGORIES.index(data_class)
 
+
+        print(CATEGORIES)
+
+        print(categories)
         internal_image_map = {}
         for image in metadata["images"]:
             new_id = image["id"] + image_id_offset
@@ -46,8 +68,33 @@ def merge_datasets(
         # Annotations must update image id reference and category
         for annotation in metadata["annotations"]:
             annotation["image_id"] = internal_image_map[annotation["image_id"]]
-            annotation["category_id"] = internal_category_map[annotation["category_id"]]
-            annotations.append(annotation)
+            if annotation["category_id"] in internal_category_map:
+                annotation["category_id"] = internal_category_map[annotation["category_id"]]
+                if "segmentation" in annotation:
+                    del annotation["segmentation"]
+                annotations.append(annotation)
+                print(label_path, annotation)
+
+    # Get all the image dirs that are specified without corresponding labels.
+    # Simply add these to the dataset's image list
+    no_label_image_dirs = [
+        image_dir for image_dir in image_dirs if image_dir not in image_dirs_label
+    ]
+    for image_dir in no_label_image_dirs:
+        new_image_dir = save_dir / "images" / image_dir.name
+        new_image_dir.mkdir(exist_ok=True, parents=True)
+        for ext in ["jpg", "jpeg", "JPG", "jpeg"]:
+            for image in image_dir.glob(f"*.{ext}"):
+                print(image)
+                new_file = new_image_dir / image.name
+                print(new_file)
+                if not new_file.is_file():
+                    shutil.copy2(
+                        image, new_image_dir / image.name
+                    )
+    
+    final_cats = set([anno["category_id"] for anno in annotations if "category_id" in anno])
+    assert len(final_cats) == len(CLASSES)
 
     save_dir.mkdir(exist_ok=True, parents=True)
     save_path = save_dir / "annotations.json"

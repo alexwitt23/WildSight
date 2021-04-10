@@ -35,7 +35,7 @@ import MainLayout from '../layouts/Main.vue'
 import CLASS_NAMES from "../../utils/class_names"
 const MODEL_URLS = {
   'remote': 'https://storage.googleapis.com/wild-sight/2021-04-02T01.03.47/model.json',
-  'local': 'http://localhost:8081/public/2021-04-02T01.03.47/model.json'
+  'local': 'http://localhost:8081/public/2021-04-07T13.19.08/model.json'
 }
 let model
 
@@ -117,7 +117,7 @@ export default {
 
     async predict(imgElement){
       const img = tf.browser.fromPixels(imgElement).resizeBilinear([512, 512]).toFloat().expandDims(0).transpose([0, 3, 1, 2])
-      
+      console.log(img.slice([0, 0, 0, 0], [-1, -1, 1, 1]).dataSync())
       const mean = tf.tensor([0.485, 0.456, 0.406]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       const std = tf.tensor([0.229, 0.224, 0.225]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       
