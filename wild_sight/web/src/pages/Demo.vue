@@ -11,6 +11,7 @@
              whale shark.
             </p>
             </div>
+            <a href="https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json">Download model</a>
            <div class="spinner-border text-success text-center m-auto d-block mt-5" role="status" v-if='!isModelReady && !initFailMessage'>
             <span class="visually-hidden">Loading model...</span>
            </div>
@@ -43,8 +44,8 @@ const MODEL_URLS = {
   //'local': 'https://storage.googleapis.com/wild-sight/2021-04-02T01.03.47/model.json',
   //'remote': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
   //'local': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
-  'local': 'http://localhost:8080/public/2021-04-07T13.19.08/model.json',
-  'remote': 'http://localhost:8080/public/2021-04-07T13.19.08/model.json'
+  'local': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
+  'remote': 'downloads://home/alex/Downloads/model.json'
 }
 let model
 
@@ -121,7 +122,26 @@ export default {
       console.log(process.env.NODE_ENV)
       let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
 
-      model = await tf.loadGraphModel(modelFilepath )
+      var result = await fetch(modelFilepath, {
+        headers: new Headers(
+          {
+            'Access-Control-Allow-Origin': 'http://localhost:8081/',
+            'Access-Control-Allow-Headers': 'http://localhost:8081/',
+            'Access-Control-Allow-Methods': ["POST", "GET"],
+            'Accept': 'application/octet-stream',
+            'User-Agent': 'request module',
+        }), 
+        "mode": "no-cors"
+      })
+      console.log(result)
+      model = await tf.loadGraphModel(modelFilepath, {requestInit: {
+        headers: new Headers(
+          {
+            'Access-Control-Allow-Origin': 'http://localhost:8081/',
+            'Access-Control-Allow-Headers': 'http://localhost:8081/',
+            'Access-Control-Allow-Methods': ["POST", "GET"]
+        }), 
+      }})
       this.isModelReady = true
       const zeros = tf.zeros([1, 3, 512, 512])
       const predictions = await model.executeAsync(zeros)
