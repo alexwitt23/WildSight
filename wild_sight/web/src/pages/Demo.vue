@@ -41,7 +41,7 @@ import MainLayout from '../layouts/Main.vue'
 import CLASS_NAMES from "../../utils/class_names"
 const MODEL_URLS = {
   'local': 'http://localhost:8081/public/2021-04-07T13.19.08/model.json',
-  'local': 'https://cdn.jsdelivr.net/gh/alexwitt23/wildsight-models@main/2021-04-07T13.19.08/model.json'
+  'remote': 'https://cdn.jsdelivr.net/gh/alexwitt23/wildsight-models@main/2021-04-07T13.19.08/model.json'
 }
 let model
 
@@ -116,7 +116,7 @@ export default {
 
     async loadCustomModel () {
       let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
-
+      console.log(modelFilepath)
       model = await tf.loadGraphModel(modelFilepath)
       this.isModelReady = true
       const zeros = tf.zeros([1, 3, 512, 512])
