@@ -11,8 +11,7 @@
              whale shark.
             </p>
             </div>
-            <a href="https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json">Download model</a>
-           <div class="spinner-border text-success text-center m-auto d-block mt-5" role="status" v-if='!isModelReady && !initFailMessage'>
+          <div class="spinner-border text-success text-center m-auto d-block mt-5" role="status" v-if='!isModelReady && !initFailMessage'>
             <span class="visually-hidden">Loading model...</span>
            </div>
           <h4 class="text-center loading" v-if="!isModelReady && !initFailMessage">Loading model...</h4>
@@ -41,11 +40,8 @@ import { RetinaNetDecoder } from '../../utils/retinanet_decoder'
 import MainLayout from '../layouts/Main.vue'
 import CLASS_NAMES from "../../utils/class_names"
 const MODEL_URLS = {
-  //'local': 'https://storage.googleapis.com/wild-sight/2021-04-02T01.03.47/model.json',
-  //'remote': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
-  //'local': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
-  'local': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
-  'remote': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json'
+  'local': 'http://localhost:8081/public/2021-04-07T13.19.08/model.json',
+  'local': 'https://cdn.jsdelivr.net/gh/alexwitt23/wildsight-models@main/2021-04-07T13.19.08/model.json'
 }
 let model
 
@@ -119,29 +115,9 @@ export default {
     },
 
     async loadCustomModel () {
-      console.log(process.env.NODE_ENV)
       let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
 
-      var result = await fetch(modelFilepath, {
-        headers: new Headers(
-          {
-            'Access-Control-Allow-Origin': 'http://localhost:8081/',
-            'Access-Control-Allow-Headers': 'http://localhost:8081/',
-            'Access-Control-Allow-Methods': "X-Requested-With, Content-Type, Authorization",
-            'Accept': 'application/octet-stream',
-            'User-Agent': 'request module',
-        }), 
-        "mode": "no-cors"
-      })
-      console.log(result)
-      model = await tf.loadGraphModel(modelFilepath, {requestInit: {
-        headers: new Headers(
-          {
-            'Access-Control-Allow-Origin': "*",
-            'Access-Control-Allow-Headers': "X-Requested-With, Content-Type, Authorization",
-            'Access-Control-Allow-Methods': "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        }), 
-      }})
+      model = await tf.loadGraphModel(modelFilepath)
       this.isModelReady = true
       const zeros = tf.zeros([1, 3, 512, 512])
       const predictions = await model.executeAsync(zeros)
