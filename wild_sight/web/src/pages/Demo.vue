@@ -45,7 +45,7 @@ const MODEL_URLS = {
   //'remote': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
   //'local': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
   'local': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json',
-  'remote': 'downloads://home/alex/Downloads/model.json'
+  'remote': 'https://github.com/alexwitt23/WildSight/releases/download/v0.0.1/model.json'
 }
 let model
 
@@ -127,7 +127,7 @@ export default {
           {
             'Access-Control-Allow-Origin': 'http://localhost:8081/',
             'Access-Control-Allow-Headers': 'http://localhost:8081/',
-            'Access-Control-Allow-Methods': ["POST", "GET"],
+            'Access-Control-Allow-Methods': "X-Requested-With, Content-Type, Authorization",
             'Accept': 'application/octet-stream',
             'User-Agent': 'request module',
         }), 
@@ -137,9 +137,9 @@ export default {
       model = await tf.loadGraphModel(modelFilepath, {requestInit: {
         headers: new Headers(
           {
-            'Access-Control-Allow-Origin': 'http://localhost:8081/',
-            'Access-Control-Allow-Headers': 'http://localhost:8081/',
-            'Access-Control-Allow-Methods': ["POST", "GET"]
+            'Access-Control-Allow-Origin': "*",
+            'Access-Control-Allow-Headers': "X-Requested-With, Content-Type, Authorization",
+            'Access-Control-Allow-Methods': "GET, POST, PUT, DELETE, PATCH, OPTIONS",
         }), 
       }})
       this.isModelReady = true
