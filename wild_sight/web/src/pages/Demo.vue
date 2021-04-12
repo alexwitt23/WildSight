@@ -21,7 +21,7 @@
             last image uploaded will have the results visualized. You may also upload one image at a time to
             see the model's results in the display window. The results come back as
             image name, class, confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1) are the top-left and
-            bottom-right coordinates of the predicted bound.
+            bottom-right coordinates of the predicted box.
           </p>
           <p class="text-left">
             The results come back as image name, class, confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1)
