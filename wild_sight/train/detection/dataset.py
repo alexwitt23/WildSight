@@ -296,16 +296,18 @@ class WhaleShark(torch.utils.data.Dataset):
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         image_data = self.images[self.ids_map[idx]]
         image = cv2.imread(str(image_data["file_name"]))
-
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         boxes = []
         category_ids = []
         for anno in image_data["annotations"]:
-            box = torch.Tensor(anno["bbox"])
-            box[2:] += box[:2]
-            box[0::2].clamp_(0, image.shape[1])
-            box[1::2].clamp_(0, image.shape[0])
-            boxes.append(box)
-            category_ids.append(anno["category_id"])
+            if "bbox" in anno:
+                box = torch.Tensor(anno["bbox"])
+                box[2:] += box[:2]
+                box[0::2].clamp_(0, image.shape[1])
+                box[1::2].clamp_(0, image.shape[0])
+                if (box[2] - box[0]) * (box[3] - box[1]):
+                    boxes.append(box)
+                    category_ids.append(anno["category_id"])
 
         return self.transform(
             image=image,

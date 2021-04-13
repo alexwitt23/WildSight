@@ -22,16 +22,16 @@ training:
     type: "Ranger"
     lr: 5.0e-4
     momentum: 0.9
-    weight_decay: 0
+    weight_decay: 0.0
   lr_schedule:
-    start_lr: 1.0e-3
-    max_lr: 1.0e-3
+    start_lr: 2.0e-4
+    max_lr: 2.0e-4
     end_lr: 1.0e-8
-    warmup_fraction: 0.0
+    warmup_fraction: 0.5
   epochs: 10
   train_batch_size: 55
   eval_batch_size: 55
   eval_start_epoch: 0
 data:
   name: "WhaleShark"
-  data_path: "/tmp/new-coco"
+  data_path: "/home/alex/datasets/whale-giraffe-zebra-coco"

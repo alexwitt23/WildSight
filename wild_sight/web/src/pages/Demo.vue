@@ -3,13 +3,39 @@
       <div class="row">
          <h1 class="display-1 mt-5 text-center">Demo</h1>  
        </div>
-       <div class="row">
-         <div class="col">
-           <div class="spinner-border text-success text-center m-auto d-block mt-5" role="status" v-if='!isModelReady && !initFailMessage'>
-            <span class="visually-hidden">Loading model...</span>
-           </div>
-          <h4 class="text-center loading" v-if="!isModelReady && !initFailMessage">Loading model...</h4>
+       <div class="row justify-content-md-center">
+          <div class="col-md-8">
+          <p class="text-left">
+            Currently, our model can find <b>giraffes</b>, <b>zebras</b>, and <b>whale sharks</b> in
+            images. We recommend using images that are 512 by 512 pixels or larger in size. If the
+            images are too small, it's likely the model will not find your animal.
+          </p>
+          <p class="text-left">
+            To get started, browse the internet or a collection of images for zebras, giraffes or whale
+            sharks. You can upload multiple images at once and recieve the results back as a CSV file. The
+            last image uploaded will have the results visualized. You may also upload one image at a time to
+            see the model's results in the display window. The results come back as
+            image name, class, confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1) are the top-left and
+            bottom-right coordinates of the predicted box.
+          </p>
+          <p class="text-left">
+            The results come back as image name, class, confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1)
+            are the top-left and bottom-right coordinates of the predicted bound.
+          </p>
+          <h2>Known limitations</h2>
+          <p class="text-left">
+            Our initial model also works much better when the input images contain just a few animals
+            of interest. This means performance might be poor for animals that are positioned behind each
+            other. A few example images are given below.
+          </p>
+          <p class="text-left">
+            We've seen poor performance on images where animals are drinking from water sources and reflections in
+            the water are present. This is a gap in our training data.
+          </p>
+          
         </div>
+        <h4 class="text-center loading" v-if="!isModelReady && !initFailMessage">Loading model...</h4>
+        <div class="spinner-border text-success" role="status" v-if='!isModelReady && !initFailMessage'></div>
       </div>
       <div class="row">
          <h3 v-if="initFailMessage">Failed to init stream and/or model - {{ initFailMessage }}</h3>
@@ -17,14 +43,24 @@
        <div class="row mt-5">
          <div class="col-xs-6 col-xs-offset-3">
           <input name="file" v-if="isModelReady" type="file" multiple accept="image/*" @change="uploadImage($event)" id="file-input">
-           <canvas ref="canvas" class="mt-5 pb-5"></canvas>
+           <canvas ref="canvas" class="mt-5 "></canvas>
+        </div>
+
+        <div id="#results" v-if="isResultReady" class="mt-5 pb-5">
+          <button v-on:click="downloadResults()" class="button btn">Download Results</button>
         </div>
       </div>
+      <div class="container">
+        <div class="row justify-content-center mb-5">
+          <div class="col-md-8">
+            <h2>Example Images</h2>
+            <img v-for="image in exampleImages" v-bind:key="image" :src="image.url" class="img-fluid pb-4">
+          </div>
+        </div>
+      </div>
+      
     </main-layout>
        
-    <div id="#results" v-if="isResultReady" class="mt-5 pb-5">
-      <button v-on:click="downloadResults()" class="button btn">Download Results</button>
-    </div>
 </template>
 
 <script>
@@ -34,8 +70,8 @@ import { RetinaNetDecoder } from '../../utils/retinanet_decoder'
 import MainLayout from '../layouts/Main.vue'
 import CLASS_NAMES from "../../utils/class_names"
 const MODEL_URLS = {
-  'remote': 'https://storage.googleapis.com/wild-sight/2021-04-02T01.03.47/model.json',
-  'local': 'http://localhost:8081/public/2021-04-02T01.03.47/model.json'
+  'local': 'http://localhost:8081/public/2021-04-07T13.19.08/model.json',
+  'remote': 'https://cdn.jsdelivr.net/gh/alexwitt23/wildsight-models@main/2021-04-07T13.19.08/model.json'
 }
 let model
 
@@ -61,7 +97,12 @@ export default {
       maxCanvasHeight: 800,
       maxCanvasWidth: 1200,
       filenames: [],
-      time: 0
+      time: 0,
+      exampleImages: [
+        {"url": "https://user-images.githubusercontent.com/31543169/114466579-4b9b0f00-9bae-11eb-9c05-c1dd5a874e34.jpg"},
+        {"url": "https://user-images.githubusercontent.com/31543169/114466605-53f34a00-9bae-11eb-8683-12ce029339f5.jpg"},
+        {"url": "https://user-images.githubusercontent.com/31543169/114466639-5d7cb200-9bae-11eb-8ec8-851c74c6d556.jpg"},
+      ]
     }
   },
   methods: {
@@ -109,8 +150,8 @@ export default {
     },
 
     async loadCustomModel () {
-      console.log(process.env.NODE_ENV)
       let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
+      console.log(modelFilepath)
       model = await tf.loadGraphModel(modelFilepath)
       this.isModelReady = true
       const zeros = tf.zeros([1, 3, 512, 512])
@@ -125,7 +166,7 @@ export default {
     async predict(imgElement){
       //console.log(imgElement)
       const img = tf.browser.fromPixels(imgElement).resizeBilinear([512, 512]).toFloat().expandDims(0).transpose([0, 3, 1, 2])
-      
+      console.log(img.slice([0, 0, 0, 0], [-1, -1, 1, 1]).dataSync())
       const mean = tf.tensor([0.485, 0.456, 0.406]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       const std = tf.tensor([0.229, 0.224, 0.225]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       
@@ -180,44 +221,34 @@ export default {
     },
     // function to set up initial headings for csv file
     csvInit(){
-
-      this.header = 'Image'   // initilize header string
+      // initilize header string
+      this.header = ["image", "class", "confidence", "x0", "y0", "x1", "y1"].join(',');
       this.csv    = ''        // initialize csv string
-      this.cls    = ''        // class designation
       this.inm    = 0         // image number
-      this.mbx    = 0         // number of boxes currently listed in the header string
 
     },
     // function to output csv, called by predict ()
     csvExport(classes, confidences, bboxes) {
-      
-      //add any box specific headings not already added
-      for (var i = this.mbx; i < bboxes.shape[0]; i++){
 
-        this.header += ','
-        var corners  = ["class", "confidence", "x0", "y0", "x1", "y1"]
-        this.header += corners.join(',');
-
-      }
-      if (this.mbx < bboxes.shape[0]) {this.mbx = bboxes.shape[0];} 
-
-      //Add image name to csv
-      this.csv += this.filenames[this.inm];
-
-      //add confidence and bounding box data for each box
-      for (i = 0; i < bboxes.shape[0]; i++){
-
-        this.csv += ','      
+      // add confidence and bounding box data for each box
+      for (var i = 0; i < bboxes.shape[0]; i++){
+    
         let arr = bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
         let con = confidences.slice([0]).toFloat().dataSync()
         let cls = classes.slice([0]).toFloat().dataSync();
         
-        var row = [String(CLASS_NAMES[cls[i]]), con[i], arr[1], arr[0], arr[3], arr[2] ];
+        var row = [
+          this.filenames[this.inm],
+          String(CLASS_NAMES[cls[i]]),
+          con[i],
+          arr[0],
+          arr[1],
+          arr[2],
+          arr[3]
+        ];
         this.csv += row.join(',');
-
+        this.csv += "\n"
       }
-
-      this.csv += "\n"
       this.inm++
 
     },

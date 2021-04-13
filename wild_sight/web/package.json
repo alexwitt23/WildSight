@@ -10,9 +10,14 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
+    "@octokit/core": "^3.4.0",
+    "@octokit/request": "^5.4.15",
+    "@popperjs/core": "^2.9.2",
     "@tensorflow/tfjs": "^3.3.0",
     "@tensorflow/tfjs-node": "^3.3.0",
     "aws-sdk": "^2.874.0",
+    "bootstrap": "^5.0.0-beta3",
+    "css-loader": "^5.2.0",
     "node-static": "^0.7.11",
     "vue": "^3.0.0",
     "vue-router": "^3.5.1"
@@ -29,6 +34,7 @@
     "sass": "^1.22.3",
     "sass-loader": "^7.1.0",
     "vue-class-component": "^7.0.2",
+    "vue-cli-plugin-vuetify": "^2.3.1",
     "webpack": "^4.28.4"
   },
   "eslintConfig": {

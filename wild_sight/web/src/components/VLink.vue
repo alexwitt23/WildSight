@@ -24,3 +24,11 @@ export default {
   }
 }
 </script>
+
+<style>
+
+a, a:hover, a:visited, a:active {
+  color: inherit;
+  text-decoration: none;
+ }
+</style>

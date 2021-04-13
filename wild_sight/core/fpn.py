@@ -78,7 +78,6 @@ class FPN(torch.nn.Module):
         # First, loop over the incoming layers and proceed as follows: from top to
         # bottom, apply lateral convolution, add with the previous layer (if there is
         # one), and then apply a convolution.
-        shapes = [[32, 32], [64, 64]]
         for idx, level_idx in enumerate(reversed(feature_maps.keys())):
 
             # Apply the lateral convolution to previous layer.
@@ -87,7 +86,7 @@ class FPN(torch.nn.Module):
             # Add the interpolated layer above, if it exists.
             if level_idx < next(reversed(feature_maps.keys())):
                 feature_maps[level_idx] += torch.nn.functional.interpolate(
-                    feature_maps[level_idx + 1], shapes[idx - 1], mode="nearest",
+                    feature_maps[level_idx + 1], feature_maps[level_idx].shape[2:], mode="nearest",
                 )
             feature_maps[level_idx] = self.convs[idx](feature_maps[level_idx])
 
