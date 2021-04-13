@@ -16,7 +16,7 @@
             last image uploaded will have the results visualized. You may also upload one image at a time to
             see the model's results in the display window. The results come back as
             image name, class, confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1) are the top-left and
-            bottom-right coordinates of the predicted box.
+            bottom-right coordinates of the predicted box.  A few example images are given below.
           </p>
           <p class="text-left">
             The results come back as image name, class, confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1)
@@ -26,7 +26,7 @@
           <p class="text-left">
             Our initial model also works much better when the input images contain just a few animals
             of interest. This means performance might be poor for animals that are positioned behind each
-            other. A few example images are given below.
+            other.
           </p>
           <p class="text-left">
             We've seen poor performance on images where animals are drinking from water sources and reflections in
@@ -229,7 +229,6 @@ export default {
     },
     // function to output csv, called by predict ()
     csvExport(classes, confidences, bboxes) {
-
       // add confidence and bounding box data for each box
       for (var i = 0; i < bboxes.shape[0]; i++){
     
