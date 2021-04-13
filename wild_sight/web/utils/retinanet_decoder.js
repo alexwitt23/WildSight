@@ -64,9 +64,10 @@ class RetinaNetDecoder {
             predictions, values, this.max_detections_per_image, this.nms_threshold, this.score_threshold
         )
         const bboxes = predictions.gather(nms_keep)
+        const classes = classes_idxs.gather(nms_keep)
         const confidences = values.gather(nms_keep)
         
-        return [classes_idxs, bboxes, confidences]
+        return [classes, bboxes, confidences]
     }
 
 }
