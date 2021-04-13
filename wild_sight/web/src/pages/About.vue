@@ -61,7 +61,7 @@
             These datasets were used because they offered clean labels of the target animals. In addition
             to having images of zebras and giraffes, the COCO dataset also contains 88 other categories of
             objects. Exposing our model to what <em>isn't</em> one of our animals helps it learn what truely
-            <em>is</em> an animal of interest. Such images are stricly required for training a model on your
+            <em>is</em> an animal of interest. Such images aren't stricly required for training a model on your
             target animal unless you want the model to be robust to extraneous detections.
           </p> 
           <h2>Training</h2>

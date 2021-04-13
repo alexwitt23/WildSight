@@ -11,11 +11,6 @@
             images are too small, it's likely the model will not find your animal.
           </p>
           <p class="text-left">
-            Our initial model is also works much better when the input images contain just a few animals
-            of interest. This means performance might be poor for animals that are positioned behind each
-            other. A few example images are given below.
-          </p>
-          <p class="text-left">
             To get started, browse the internet or a collection of images for zebras, giraffes or whale
             sharks. You can upload multiple images at once and recieve the results back as a CSV file. The
             last image uploaded will have the results visualized. You may also upload one image at a time to
@@ -27,6 +22,17 @@
             The results come back as image name, class, confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1)
             are the top-left and bottom-right coordinates of the predicted bound.
           </p>
+          <h2>Known limitations</h2>
+          <p class="text-left">
+            Our initial model also works much better when the input images contain just a few animals
+            of interest. This means performance might be poor for animals that are positioned behind each
+            other. A few example images are given below.
+          </p>
+          <p class="text-left">
+            We've seen poor performance on images where animals are drinking from water sources and reflections in
+            the water are present. This is a gap in our training data.
+          </p>
+          
         </div>
         <h4 class="text-center loading" v-if="!isModelReady && !initFailMessage">Loading model...</h4>
         <div class="spinner-border text-success" role="status" v-if='!isModelReady && !initFailMessage'></div>
