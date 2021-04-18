@@ -112,6 +112,7 @@ export default {
       this.csvInit()
 
       // iterate through input files
+      this.filenames = [];
       for (let fl of event.target.files) {
 
         this.filenames.push( fl.name );
