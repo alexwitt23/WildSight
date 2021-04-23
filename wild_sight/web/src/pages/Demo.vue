@@ -32,7 +32,6 @@
             We've seen poor performance on images where animals are drinking from water sources and reflections in
             the water are present. This is a gap in our training data.
           </p>
-          
         </div>
         <h4 class="text-center loading" v-if="!isModelReady && !initFailMessage">Loading model...</h4>
         <div class="spinner-border text-success" role="status" v-if='!isModelReady && !initFailMessage'></div>
@@ -40,12 +39,17 @@
       <div class="row">
          <h3 v-if="initFailMessage">Failed to init stream and/or model - {{ initFailMessage }}</h3>
        </div>
-       <div class="row mt-5">
+       <div class="row mt-5 justify-content-md-center">
          <div class="col-xs-6 col-xs-offset-3">
           <input name="file" v-if="isModelReady" type="file" multiple accept="image/*" @change="uploadImage($event)" id="file-input">
-           <canvas ref="canvas" class="mt-5 "></canvas>
+          <canvas ref="canvas" class="mt-5 "></canvas>
+         </div>
+        <div class="col-5 mt-5 mb-5" v-if="isResultReady">
+          <Slider v-model="userConfidence" @update="renderPredictionBoxes()"/>
+          <p class="text-center mt-3">
+            Model Confidence
+          </p>
         </div>
-
         <div id="#results" v-if="isResultReady" class="mt-5 pb-5">
           <button v-on:click="downloadResults()" class="button btn">Download Results</button>
         </div>
@@ -64,7 +68,7 @@
 </template>
 
 <script>
-
+import Slider from '@vueform/slider'
 import * as tf from '@tensorflow/tfjs'
 import { RetinaNetDecoder } from '../../utils/retinanet_decoder'
 import MainLayout from '../layouts/Main.vue'
@@ -80,10 +84,12 @@ export default {
   name: 'app',
   el: '#results',
   components: {
-    MainLayout
+    MainLayout,
+    Slider,
   },
   data () {
     return {
+      userConfidence: 0.50,
       // store the promises of initialization
       image: null,
       // control the UI visibilities
@@ -137,7 +143,6 @@ export default {
               this.imgHeight = img.height
             }
             
-            console.log(this.imgWidth, this.imgHeight, aspectRatio)
             this.predict(img)
           };
         }
@@ -152,7 +157,6 @@ export default {
 
     async loadCustomModel () {
       let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
-      console.log(modelFilepath)
       model = await tf.loadGraphModel(modelFilepath)
       this.isModelReady = true
       const zeros = tf.zeros([1, 3, 512, 512])
@@ -165,9 +169,8 @@ export default {
     },
 
     async predict(imgElement){
-      //console.log(imgElement)
+      this.imgElement = imgElement
       const img = tf.browser.fromPixels(imgElement).resizeBilinear([512, 512]).toFloat().expandDims(0).transpose([0, 3, 1, 2])
-      console.log(img.slice([0, 0, 0, 0], [-1, -1, 1, 1]).dataSync())
       const mean = tf.tensor([0.485, 0.456, 0.406]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       const std = tf.tensor([0.229, 0.224, 0.225]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       
@@ -185,29 +188,33 @@ export default {
       const regressions = predictions.slice([0, 0], [-1, 4])
       const class_logits = predictions.slice([0, 4], [-1, -1])
       const [classes, bboxes, confidences] = await this.decoder.get_boxes(class_logits, regressions)
-      this.renderPredictionBoxes(imgElement, bboxes)
-      this.csvExport(classes, confidences, bboxes)
+      this.classes = classes
+      this.bboxes = bboxes
+      this.confidences = confidences
+      this.renderPredictionBoxes()
       img.dispose()
       this.isResultReady = true
     return [confidences, bboxes]
     },
 
-    renderPredictionBoxes (imgElement, bboxes) {
+    async renderPredictionBoxes () {
       let cvn = this.$refs.canvas;
       cvn.width = this.imgWidth;
       cvn.height = this.imgHeight;
       let ctx = cvn.getContext("2d");  
-      ctx.drawImage(imgElement, 0 ,0, this.imgWidth, this.imgHeight);
+      ctx.drawImage(this.imgElement, 0, 0, this.imgWidth, this.imgHeight);
+      
+      for (var i = 0; i < this.bboxes.shape[0]; i++){
 
-      for (var i = 0; i < bboxes.shape[0]; i++){
-        let arr = bboxes.slice([i, 0], [1, -1]).toInt().dataSync()
-        
+        let con = this.confidences.slice([i], [1]).toFloat().dataSync()
+        let arr = this.bboxes.slice([i, 0], [1, -1]).toInt().dataSync()
+
         const minX = arr[0] / 512 * this.imgWidth
         const minY = arr[1] / 512 * this.imgHeight
         const maxX = arr[2] / 512 * this.imgWidth
         const maxY = arr[3] / 512 * this.imgHeight
-        const score = 100
-        if (score > 75) {
+
+        if (con > this.userConfidence / 100) {
           ctx.beginPath()
           ctx.rect(minX, minY, maxX - minX, maxY - minY)
           ctx.lineWidth = 3
@@ -229,30 +236,34 @@ export default {
 
     },
     // function to output csv, called by predict ()
-    csvExport(classes, confidences, bboxes) {
+    csvExport() {
       // add confidence and bounding box data for each box
-      for (var i = 0; i < bboxes.shape[0]; i++){
+      for (var i = 0; i < this.bboxes.shape[0]; i++){
     
-        let arr = bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
-        let con = confidences.slice([0]).toFloat().dataSync()
-        let cls = classes.slice([0]).toFloat().dataSync();
-        
-        var row = [
-          this.filenames[this.inm],
-          String(CLASS_NAMES[cls[i]]),
-          con[i],
-          arr[0],
-          arr[1],
-          arr[2],
-          arr[3]
-        ];
-        this.csv += row.join(',');
-        this.csv += "\n"
+        let arr = this.bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
+        let con = this.confidences.slice([i], [1]).toFloat().dataSync()[0]
+        let cls = this.classes.slice([i], [1]).toFloat().dataSync()[0];
+
+        if (con > this.userConfidence / 100) {
+          var row = [
+            this.filenames[this.inm],
+            String(CLASS_NAMES[cls]),
+            con,
+            arr[0] / 512 * this.imgWidth,
+            arr[1] / 512 * this.imgHeight,
+            arr[2] / 512 * this.imgWidth,
+            arr[3] / 512 * this.imgHeight
+          ];
+          this.csv += row.join(',');
+          this.csv += "\n"
+        }
       }
       this.inm++
 
     },
     downloadResults () {
+      this.csvInit()
+      this.csvExport()
       // print average processing time to console   
       console.log('Average processing time: ' + String(this.time/this.inm) + ' milliseconds' )
       
@@ -273,6 +284,8 @@ export default {
 }
 </script>
 
+<style src="@vueform/slider/themes/default.css"></style>
+
 <style lang="scss">
 .resultFrame {
   display: grid;
@@ -292,4 +305,5 @@ export default {
 .canvas-wrapper {
   position: relative;
 }
+
 </style>

@@ -18,7 +18,6 @@ var fileServer = new nStatic.Server(
 
 require('http').createServer(function (request, response) {
     request.addListener('end', function () {
-        console.log(response)
         fileServer.serve(request, response);
     }).resume();
 }).listen(8080);
