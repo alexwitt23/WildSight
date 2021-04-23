@@ -275,13 +275,13 @@ class WhaleShark(torch.utils.data.Dataset):
         image_ids = list(self.images.keys())
         random.Random(42).shuffle(image_ids)
         if validation:
-            num_val = int(len(self.images) * 0.2)
+            num_val = int(len(self.images) * 0.5)
             keep_ids = image_ids[-num_val:]
             self.images = {
                 key: val for key, val in self.images.items() if key in keep_ids
             }
         else:
-            num_val = int(len(self.images) * 0.2)
+            num_val = int(len(self.images) * 0.5)
             keep_ids = image_ids[:-num_val]
             self.images = {
                 key: val for key, val in self.images.items() if key in keep_ids

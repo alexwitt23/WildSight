@@ -4,7 +4,7 @@
          <h1 class="display-1 mt-5 text-center">Demo</h1>  
        </div>
        <div class="row justify-content-md-center">
-          <div class="col-md-8">
+          <div class="col-md-6">
           <p class="text-left">
             Currently, our model can find <b>giraffes</b>, <b>zebras</b>, and <b>whale sharks</b> in
             images. We recommend using images that are 512 by 512 pixels or larger in size. If the

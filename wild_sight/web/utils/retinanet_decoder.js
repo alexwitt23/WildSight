@@ -5,7 +5,7 @@ import json from '../public/anchors.json'
 class RetinaNetDecoder {
     constructor(
         num_classes = 1,
-        score_threshold = 0.6,
+        score_threshold = 0.2,
         topk_candidates = 100,
         nms_threshold = 0.3,
         max_detections_per_image = 10,
