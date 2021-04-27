@@ -1,10 +1,10 @@
 <template> 
-    <main-layout>
+    <navbar></navbar>
       <div class="row">
          <h1 class="display-1 mt-5 text-center">Demo</h1>  
        </div>
        <div class="row justify-content-md-center">
-          <div class="col-md-8">
+          <div class="col-md-6">
           <p class="text-left">
             Currently, our model can find <b>giraffes</b>, <b>zebras</b>, and <b>whale sharks</b> in
             images. We recommend using images that are 512 by 512 pixels or larger in size. If the
@@ -52,23 +52,20 @@
       </div>
       <div class="container">
         <div class="row justify-content-center mb-5">
-          <div class="col-md-8">
+          <div class="col-md-6">
             <h2>Example Images</h2>
             <img v-for="image in exampleImages" v-bind:key="image" :src="image.url" class="img-fluid pb-4">
           </div>
         </div>
-      </div>
-      
-    </main-layout>
-       
+      </div>       
 </template>
 
 <script>
 
 import * as tf from '@tensorflow/tfjs'
 import { RetinaNetDecoder } from '../../utils/retinanet_decoder'
-import MainLayout from '../layouts/Main.vue'
 import CLASS_NAMES from "../../utils/class_names"
+import Navbar from '../layouts/NavBar'
 const MODEL_URLS = {
   'local': 'http://localhost:8081/public/2021-04-07T13.19.08/model.json',
   'remote': 'https://cdn.jsdelivr.net/gh/alexwitt23/wildsight-models@main/2021-04-07T13.19.08/model.json'
@@ -80,7 +77,7 @@ export default {
   name: 'app',
   el: '#results',
   components: {
-    MainLayout
+    'navbar': Navbar
   },
   data () {
     return {

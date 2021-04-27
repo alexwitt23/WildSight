@@ -1,5 +1,5 @@
 <template>
-  <main-layout></main-layout>
+  <navbar></navbar>
   <div class="cover">  
    <div class="container-fluid">
       <div class="row">
@@ -12,10 +12,10 @@
 </template>
 
 <script>
-import MainLayout from '../layouts/Main.vue'
+import Navbar from '../layouts/NavBar'
 export default {
   components: {
-    MainLayout
+    'navbar': Navbar
   }
 }
 </script>

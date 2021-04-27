@@ -1,6 +1,6 @@
 <template>
+  <navbar></navbar>
   <div class="container-fluid">
-    <main-layout></main-layout>
     <div class="cover2">
         <h1 class="display-1 mt-5 mb-4 text-center">About Us</h1>
     </div>
@@ -91,10 +91,10 @@
 </template>
 
 <script>
-import MainLayout from '../layouts/Main.vue'
+import NavBar from '../layouts/NavBar'
 export default {
   components: {
-    MainLayout
+    'navbar': NavBar
   },
   data() {
     return {
