@@ -84,7 +84,7 @@ def train(
     )
     if initial_timestamp is not None:
         model.load_state_dict(
-            torch.load(initial_timestamp / "ap30.pt", map_location="cpu")
+            torch.load(initial_timestamp / "min-loss.pt", map_location="cpu")
         )
     ema_model = ema.Ema(model)
     model.to(device)

@@ -1,7 +1,7 @@
 <template> 
-    <navbar></navbar>
+    <main-layout>
       <div class="row">
-         <h1 class="display-1 mt-5 text-center">Demo</h1>  
+         <h1 class="display-1 mt-5 text-center">Swift Parrots</h1>  
        </div>
        <div class="row justify-content-md-center">
           <div class="col-md-6">
@@ -56,20 +56,23 @@
       </div>
       <div class="container">
         <div class="row justify-content-center mb-5">
-          <div class="col-md-6">
+          <div class="col-md-8">
             <h2>Example Images</h2>
             <img v-for="image in exampleImages" v-bind:key="image" :src="image.url" class="img-fluid pb-4">
           </div>
         </div>
-      </div>       
+      </div>
+      
+    </main-layout>
+       
 </template>
 
 <script>
 import Slider from '@vueform/slider'
 import * as tf from '@tensorflow/tfjs'
 import { RetinaNetDecoder } from '../../utils/retinanet_decoder'
+import MainLayout from '../layouts/Main.vue'
 import CLASS_NAMES from "../../utils/class_names"
-import Navbar from '../layouts/NavBar'
 const MODEL_URLS = {
   'local': 'http://localhost:8081/public/2021-04-07T13.19.08/model.json',
   'remote': 'https://cdn.jsdelivr.net/gh/alexwitt23/wildsight-models@main/2021-04-07T13.19.08/model.json'
@@ -81,8 +84,8 @@ export default {
   name: 'app',
   el: '#results',
   components: {
+    MainLayout,
     Slider,
-    'navbar': Navbar
   },
   data () {
     return {

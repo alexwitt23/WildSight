@@ -15,16 +15,26 @@ Train a model on everything but COCO.
     --coco_image_dirs "~/Downloads/whaleshark.coco/images/train2020,/media/alex/Elements/gzgc.coco/images/train2020,/home/alex/Downloads/archive (2)/shark-images" \
     --save_dir ~/datasets/whale-giraffe-zebra
 
+./wild_sight/train/train_utils/combine_coco.py \
+    --coco_metadata_path "/home/alex/datasets/swift-parrots/dataset/annotations.json" \
+    --coco_image_dirs "/home/alex/datasets/swift-parrots/dataset/images,/home/alex/datasets/birds" \
+    --save_dir ~/datasets/swift-parrot-and-birds
+
+./wild_sight/train/train_utils/combine_coco.py \
+    --coco_metadata_path "/home/alex/datasets/swift-parrots/dataset-withoutails/annotations.json" \
+    --coco_image_dirs "/home/alex/datasets/swift-parrots/dataset-withoutails/images,/home/alex/datasets/birds" \
+    --save_dir ~/datasets/swift-parrot-and-birds-no-tails
 """
 
 import argparse
 import pathlib
 import json
 import shutil
+import hashlib
 from typing import List
 
 
-CLASSES = {"zebra": False, "giraffe": False, "rhincodon_typus": False}
+CLASSES = {"parrot": False}
 CATEGORIES = []
 
 def merge_datasets(
@@ -95,13 +105,17 @@ def merge_datasets(
         new_image_dir = save_dir / "images" / image_dir.name
         new_image_dir.mkdir(exist_ok=True, parents=True)
         for ext in ["jpg", "jpeg", "JPG", "jpeg"]:
-            for image in image_dir.glob(f"*.{ext}"):
-                print(image)
-                new_file = new_image_dir / image.name
-                print(new_file)
+            for image in image_dir.rglob(f"*.{ext}"):
+                image_dict = {
+                    "id": len(images),
+                    "file_name": str(image)
+                }
+                images.append(image_dict)
+                new_file = new_image_dir / f"{hashlib.sha256(bytes(image)).hexdigest()}{image.suffix}"
+                print(image, new_file)
                 if not new_file.is_file():
                     shutil.copy2(
-                        image, new_image_dir / image.name
+                        image, new_file
                     )
     
     final_cats = set([anno["category_id"] for anno in annotations if "category_id" in anno])
