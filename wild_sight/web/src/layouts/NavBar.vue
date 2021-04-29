@@ -17,6 +17,9 @@
         <li class="nav-item">
           <router-link class="nav-link" to="/demo">Demo</router-link>
         </li>
+        <li class="nav-item">
+          <router-link class="nav-link" to="/swift-parrot">Swift Parrot</router-link>
+        </li>
       </ul>
     </div>
   </div>

@@ -1,38 +1,20 @@
 <template> 
-    <main-layout>
+    <navbar></navbar>
       <div class="row">
          <h1 class="display-1 mt-5 text-center">Swift Parrots</h1>  
        </div>
        <div class="row justify-content-md-center">
           <div class="col-md-6">
           <p class="text-left">
-            Currently, our model can find <b>giraffes</b>, <b>zebras</b>, and <b>whale sharks</b> in
-            images. We recommend using images that are 512 by 512 pixels or larger in size. If the
-            images are too small, it's likely the model will not find your animal.
-          </p>
-          <p class="text-left">
-            To get started, browse the internet or a collection of images for zebras, giraffes or whale
-            sharks. You can upload multiple images at once and recieve the results back as a CSV file. The
-            last image uploaded will have the results visualized. You may also upload one image at a time to
-            see the model's results in the display window. The results come back as
-            image name, class, confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1) are the top-left and
-            bottom-right coordinates of the predicted box.  A few example images are given below.
+            We created a dataset of close to 880 pictures of swift parrots from various sources. This dataset was
+            then combined with <a href="https://www.kaggle.com/gpiosenka/100-bird-species"><b>this</b></a> dataset
+            265 other bird species and about 37k images.
           </p>
           <p class="text-left">
             The results come back as image name, class, confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1)
             are the top-left and bottom-right coordinates of the predicted bound.
           </p>
-          <h2>Known limitations</h2>
-          <p class="text-left">
-            Our initial model also works much better when the input images contain just a few animals
-            of interest. This means performance might be poor for animals that are positioned behind each
-            other.
-          </p>
-          <p class="text-left">
-            We've seen poor performance on images where animals are drinking from water sources and reflections in
-            the water are present. This is a gap in our training data.
-          </p>
-        </div>
+       </div>
         <h4 class="text-center loading" v-if="!isModelReady && !initFailMessage">Loading model...</h4>
         <div class="spinner-border text-success" role="status" v-if='!isModelReady && !initFailMessage'></div>
       </div>
@@ -56,23 +38,20 @@
       </div>
       <div class="container">
         <div class="row justify-content-center mb-5">
-          <div class="col-md-8">
+          <div class="col-md-6">
             <h2>Example Images</h2>
             <img v-for="image in exampleImages" v-bind:key="image" :src="image.url" class="img-fluid pb-4">
           </div>
         </div>
-      </div>
-      
-    </main-layout>
-       
+      </div>       
 </template>
 
 <script>
 import Slider from '@vueform/slider'
 import * as tf from '@tensorflow/tfjs'
 import { RetinaNetDecoder } from '../../utils/retinanet_decoder'
-import MainLayout from '../layouts/Main.vue'
 import CLASS_NAMES from "../../utils/class_names"
+import Navbar from '../layouts/NavBar'
 const MODEL_URLS = {
   'local': 'http://localhost:8081/public/2021-04-07T13.19.08/model.json',
   'remote': 'https://cdn.jsdelivr.net/gh/alexwitt23/wildsight-models@main/2021-04-07T13.19.08/model.json'
@@ -84,8 +63,8 @@ export default {
   name: 'app',
   el: '#results',
   components: {
-    MainLayout,
     Slider,
+    'navbar': Navbar
   },
   data () {
     return {
@@ -105,9 +84,9 @@ export default {
       filenames: [],
       time: 0,
       exampleImages: [
-        {"url": "https://user-images.githubusercontent.com/31543169/114466579-4b9b0f00-9bae-11eb-9c05-c1dd5a874e34.jpg"},
-        {"url": "https://user-images.githubusercontent.com/31543169/114466605-53f34a00-9bae-11eb-8683-12ce029339f5.jpg"},
-        {"url": "https://user-images.githubusercontent.com/31543169/114466639-5d7cb200-9bae-11eb-8ec8-851c74c6d556.jpg"},
+        {"url": "https://user-images.githubusercontent.com/31543169/116627198-45c55d80-a912-11eb-83ee-18f57cc8f8ce.jpg"},
+        {"url": "https://user-images.githubusercontent.com/31543169/116627235-57a70080-a912-11eb-8239-4783b6c052c9.jpg"},
+        {"url": "https://user-images.githubusercontent.com/31543169/116627224-5249b600-a912-11eb-84fc-d47b65998bce.jpeg"},
       ]
     }
   },
