@@ -49,12 +49,11 @@
 <script>
 import Slider from '@vueform/slider'
 import * as tf from '@tensorflow/tfjs'
-import { RetinaNetDecoder } from '../../utils/retinanet_decoder'
-import CLASS_NAMES from "../../utils/class_names"
+import { RetinaNetDecoder } from '../../utils/retinanet_decoder_parrot'
 import Navbar from '../layouts/NavBar'
 const MODEL_URLS = {
-  'local': 'http://localhost:8081/public/2021-04-07T13.19.08/model.json',
-  'remote': 'https://cdn.jsdelivr.net/gh/alexwitt23/wildsight-models@main/2021-04-07T13.19.08/model.json'
+  'local': 'http://localhost:8081/public/2021-04-29T17.09.05/model.json',
+  'remote': 'https://cdn.jsdelivr.net/gh/alexwitt23/wildsight-models@main/2021-04-29T17.09.05/model.json'
 }
 let model
 
@@ -82,6 +81,7 @@ export default {
       maxCanvasHeight: 800,
       maxCanvasWidth: 1200,
       filenames: [],
+      modelSize: 640,
       time: 0,
       exampleImages: [
         {"url": "https://user-images.githubusercontent.com/31543169/116627198-45c55d80-a912-11eb-83ee-18f57cc8f8ce.jpg"},
@@ -138,18 +138,18 @@ export default {
       let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
       model = await tf.loadGraphModel(modelFilepath)
       this.isModelReady = true
-      const zeros = tf.zeros([1, 3, 512, 512])
+      const zeros = tf.zeros([1, 3, this.modelSize, this.modelSize])
       const predictions = await model.executeAsync(zeros)
       const regressions = predictions.slice([0, 0], [-1, 4])
       const class_logits = predictions.slice([0, 4], [-1, -1])
-
+      console.log(predictions.dataSync())
       await this.decoder.get_boxes(class_logits, regressions)
       console.log("Loaded model.")
     },
 
     async predict(imgElement){
       this.imgElement = imgElement
-      const img = tf.browser.fromPixels(imgElement).resizeBilinear([512, 512]).toFloat().expandDims(0).transpose([0, 3, 1, 2])
+      const img = tf.browser.fromPixels(imgElement).resizeBilinear([this.modelSize, this.modelSize]).toFloat().expandDims(0).transpose([0, 3, 1, 2])
       const mean = tf.tensor([0.485, 0.456, 0.406]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       const std = tf.tensor([0.229, 0.224, 0.225]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       
@@ -187,11 +187,11 @@ export default {
 
         let con = this.confidences.slice([i], [1]).toFloat().dataSync()
         let arr = this.bboxes.slice([i, 0], [1, -1]).toInt().dataSync()
-
-        const minX = arr[0] / 512 * this.imgWidth
-        const minY = arr[1] / 512 * this.imgHeight
-        const maxX = arr[2] / 512 * this.imgWidth
-        const maxY = arr[3] / 512 * this.imgHeight
+        console.log(arr)
+        const minX = arr[0] / this.modelSize * this.imgWidth
+        const minY = arr[1] / this.modelSize * this.imgHeight
+        const maxX = arr[2] / this.modelSize * this.imgWidth
+        const maxY = arr[3] / this.modelSize * this.imgHeight
 
         if (con > this.userConfidence / 100) {
           ctx.beginPath()
@@ -221,17 +221,16 @@ export default {
     
         let arr = this.bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
         let con = this.confidences.slice([i], [1]).toFloat().dataSync()[0]
-        let cls = this.classes.slice([i], [1]).toFloat().dataSync()[0];
 
         if (con > this.userConfidence / 100) {
           var row = [
             this.filenames[this.inm],
-            String(CLASS_NAMES[cls]),
+            "swift-parrot",
             con,
-            arr[0] / 512 * this.imgWidth,
-            arr[1] / 512 * this.imgHeight,
-            arr[2] / 512 * this.imgWidth,
-            arr[3] / 512 * this.imgHeight
+            arr[0] / this.modelSize * this.imgWidth,
+            arr[1] / this.modelSize * this.imgHeight,
+            arr[2] / this.modelSize * this.imgWidth,
+            arr[3] / this.modelSize * this.imgHeight
           ];
           this.csv += row.join(',');
           this.csv += "\n"
@@ -257,7 +256,7 @@ export default {
   },
   mounted () {
     this.initializeBackend()
-    this.decoder = new RetinaNetDecoder(CLASS_NAMES.length)
+    this.decoder = new RetinaNetDecoder(1)
     this.loadCustomModel()
   }
 }

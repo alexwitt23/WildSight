@@ -17,12 +17,12 @@ from wild_sight.train.detection import dataset
 save_dir = pathlib.Path("/tmp/imgs")
 save_dir.mkdir(exist_ok=True)
 
-model = detector.Detector(timestamp="2021-04-28T12.52.01", confidence=0.3)
+model = detector.Detector(timestamp="2021-04-29T17.09.05", confidence=0.3)
 model.eval()
 
 
 img_dir = pathlib.Path("/home/alex/datasets/swift-parrots/dataset/images")
-augs = alb.Compose([alb.Resize(height=512, width=512), alb.Normalize()],)
+augs = alb.Compose([alb.Resize(height=640, width=640), alb.Normalize()],)
 with torch.no_grad():
     for idx, image_path in enumerate(img_dir.glob("*")):
         image_ori = cv2.imread(str(image_path))

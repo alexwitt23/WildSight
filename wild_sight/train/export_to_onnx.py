@@ -54,7 +54,7 @@ def convert_model(timestamp: str) -> None:
     # Input to the model
     x = torch.ones(1, 3, model.img_height, model.img_width, requires_grad=True)
 
-    out = RetinaNetWrapper(model)(torch.zeros((1, 3, 512, 512)))
+    out = RetinaNetWrapper(model)(torch.zeros((1, 3, 640, 640)))
     print(out[..., :4])
     print(out[..., 4:])
     # Export the model
