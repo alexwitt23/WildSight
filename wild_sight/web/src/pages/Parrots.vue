@@ -6,13 +6,29 @@
        <div class="row justify-content-md-center">
           <div class="col-md-6">
           <p class="text-left">
-            We created a dataset of close to 880 pictures of swift parrots from various sources. This dataset was
-            then combined with <a href="https://www.kaggle.com/gpiosenka/100-bird-species"><b>this</b></a> dataset
-            265 other bird species and about 37k images.
+            We created a dataset of close to 880 pictures of swift parrots from various sources.
+            We downloaded around 400-500 pictures from Google Images and extracted frames
+            from a couple different YouTube videos. Then, all images were labelled using
+            <a href="https://www.makesense.ai/"><b>MakeSense</b></a>.
           </p>
           <p class="text-left">
-            The results come back as image name, class, confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1)
-            are the top-left and bottom-right coordinates of the predicted bound.
+            To make our model more robust against other bird species, the parrot dataset was
+            combined with <a href="https://www.kaggle.com/gpiosenka/100-bird-species"><b>this</b></a>
+            dataset of 265 other bird species and about 37k images.
+          </p>
+
+          <p class="text-left">
+            Having close to 900 images is a good start, but we could still use more to
+            improve model performance. The parrots can be in many different environments:
+            flying, bathing, eating, drinking, etc. More images of these actions will help
+            the model generalize.
+          </p>        
+          <p class="text-left">
+            Below, you can drop multiple files. Currently, the last file to be uploaded is
+            visualized. After running the model, the results come back as image name,
+            object class, detection confidence, x0, y0, x1, y1, where (x0, y0) and (x1, y1)
+            are the top-left and bottom-right coordinates of the predicted bounding box. These
+            can be downloaded as a csv file.
           </p>
        </div>
         <h4 class="text-center loading" v-if="!isModelReady && !initFailMessage">Loading model...</h4>
@@ -47,6 +63,7 @@
 </template>
 
 <script>
+
 import Slider from '@vueform/slider'
 import * as tf from '@tensorflow/tfjs'
 import { RetinaNetDecoder } from '../../utils/retinanet_decoder_parrot'
@@ -67,6 +84,7 @@ export default {
   },
   data () {
     return {
+      results: {},
       userConfidence: 0.50,
       // store the promises of initialization
       image: null,
@@ -100,7 +118,7 @@ export default {
       this.filenames = [];
       for (let fl of event.target.files) {
 
-        this.filenames.push( fl.name );
+        this.filenames.push(fl.name);
        
         let reader = new FileReader();
         reader.onload = e => {
@@ -122,7 +140,7 @@ export default {
               this.imgHeight = img.height
             }
             
-            this.predict(img)
+            this.predict(img, fl.name)
           };
         }
         reader.readAsDataURL(fl);
@@ -137,22 +155,23 @@ export default {
     async loadCustomModel () {
       let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
       model = await tf.loadGraphModel(modelFilepath)
-      this.isModelReady = true
+
+      // Warmup the model first and run all the overhead-heavy intialization operations.
       const zeros = tf.zeros([1, 3, this.modelSize, this.modelSize])
       const predictions = await model.executeAsync(zeros)
       const regressions = predictions.slice([0, 0], [-1, 4])
       const class_logits = predictions.slice([0, 4], [-1, -1])
-      console.log(predictions.dataSync())
       await this.decoder.get_boxes(class_logits, regressions)
+
       console.log("Loaded model.")
+      this.isModelReady = true
     },
 
-    async predict(imgElement){
+    async predict(imgElement, imageName){
       this.imgElement = imgElement
       const img = tf.browser.fromPixels(imgElement).resizeBilinear([this.modelSize, this.modelSize]).toFloat().expandDims(0).transpose([0, 3, 1, 2])
       const mean = tf.tensor([0.485, 0.456, 0.406]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       const std = tf.tensor([0.229, 0.224, 0.225]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
-      
       const normalized = img.sub(mean).div(std)
 
       //timing variable
@@ -170,6 +189,13 @@ export default {
       this.classes = classes
       this.bboxes = bboxes
       this.confidences = confidences
+
+      this.results[imageName] = {
+        "classes": classes.arraySync(),
+        "bboxes": bboxes.arraySync(),
+        "confidences": confidences.arraySync(),
+      }
+
       this.renderPredictionBoxes()
       img.dispose()
       this.isResultReady = true
@@ -187,7 +213,7 @@ export default {
 
         let con = this.confidences.slice([i], [1]).toFloat().dataSync()
         let arr = this.bboxes.slice([i, 0], [1, -1]).toInt().dataSync()
-        console.log(arr)
+
         const minX = arr[0] / this.modelSize * this.imgWidth
         const minY = arr[1] / this.modelSize * this.imgHeight
         const maxX = arr[2] / this.modelSize * this.imgWidth
@@ -206,37 +232,40 @@ export default {
         }
       }
     },
-    // function to set up initial headings for csv file
+
     csvInit(){
-      // initilize header string
       this.header = ["image", "class", "confidence", "x0", "y0", "x1", "y1"].join(',');
-      this.csv    = ''        // initialize csv string
-      this.inm    = 0         // image number
-
+      this.csv    = ''
+      this.imageIdx    = 0
     },
-    // function to output csv, called by predict ()
-    csvExport() {
-      // add confidence and bounding box data for each box
-      for (var i = 0; i < this.bboxes.shape[0]; i++){
-    
-        let arr = this.bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
-        let con = this.confidences.slice([i], [1]).toFloat().dataSync()[0]
 
-        if (con > this.userConfidence / 100) {
-          var row = [
-            this.filenames[this.inm],
-            "swift-parrot",
-            con,
-            arr[0] / this.modelSize * this.imgWidth,
-            arr[1] / this.modelSize * this.imgHeight,
-            arr[2] / this.modelSize * this.imgWidth,
-            arr[3] / this.modelSize * this.imgHeight
-          ];
-          this.csv += row.join(',');
-          this.csv += "\n"
+    csvExport() {
+      for (var i = 0; i < this.filenames.length; i++){
+        let fileName = this.filenames[i]
+
+        const results = this.results[fileName]
+        let arrs = results["bboxes"]
+        let cons = results["confidences"]
+
+        for (var j = 0; j < arrs.length; j++){
+          let con = cons[j]
+          let arr = arrs[j]
+          if (con > this.userConfidence / 100) {
+            var row = [
+              this.filenames[i],
+              "swift-parrot",
+              con,
+              arr[0] / this.modelSize * this.imgWidth,
+              arr[1] / this.modelSize * this.imgHeight,
+              arr[2] / this.modelSize * this.imgWidth,
+              arr[3] / this.modelSize * this.imgHeight
+            ];
+            this.csv += row.join(',');
+            this.csv += "\n"
+          }
         }
+        this.imageIdx++
       }
-      this.inm++
 
     },
     downloadResults () {
