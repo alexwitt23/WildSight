@@ -8,7 +8,7 @@
           <p class="text-left">
             We created a dataset of close to 880 pictures of swift parrots from various sources.
             We downloaded around 400-500 pictures from Google Images and extracted frames
-            from a couple different YouTube videos. Then, all images were labelled using
+            from a couple different YouTube videos. All images were labelled using
             <a href="https://www.makesense.ai/"><b>MakeSense</b></a>.
           </p>
           <p class="text-left">
