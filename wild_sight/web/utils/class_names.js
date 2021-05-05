@@ -1,5 +1,5 @@
 const CLASS_NAMES = [
-    "whale",
+    "whale shark",
     "giraffe",
     "zebra"
 ];

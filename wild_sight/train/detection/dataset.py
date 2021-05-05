@@ -255,9 +255,6 @@ class WhaleShark(torch.utils.data.Dataset):
         super().__init__()
         self.meta_data = json.loads(metadata_path.read_text())
 
-        self.images = list(data_dir.rglob("*.jpg"))
-        assert self.images, f"No images found in {data_dir}."
-
         self.img_height = img_height
         self.img_width = img_width
         self.transform = (
@@ -274,14 +271,13 @@ class WhaleShark(torch.utils.data.Dataset):
 
         image_ids = list(self.images.keys())
         random.Random(42).shuffle(image_ids)
+        num_val = int(len(self.images) * 0.2)
         if validation:
-            num_val = int(len(self.images) * 0.2)
             keep_ids = image_ids[-num_val:]
             self.images = {
                 key: val for key, val in self.images.items() if key in keep_ids
             }
         else:
-            num_val = int(len(self.images) * 0.2)
             keep_ids = image_ids[:-num_val]
             self.images = {
                 key: val for key, val in self.images.items() if key in keep_ids

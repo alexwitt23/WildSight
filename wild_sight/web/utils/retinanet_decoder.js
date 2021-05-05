@@ -5,9 +5,9 @@ import json from '../public/anchors.json'
 class RetinaNetDecoder {
     constructor(
         num_classes = 1,
-        score_threshold = 0.6,
+        score_threshold = 0.01,
         topk_candidates = 100,
-        nms_threshold = 0.3,
+        nms_threshold = 0.4,
         max_detections_per_image = 10,
     ) {
         this.num_classes = num_classes
@@ -60,6 +60,7 @@ class RetinaNetDecoder {
           pred_ctr_x.add(tf.tensor([0.5]).mul(pred_w)),
           pred_ctr_y.add(tf.tensor([0.5]).mul(pred_h)),
         ], -1)
+        
         var nms_keep = await tf.image.nonMaxSuppressionAsync(
             predictions, values, this.max_detections_per_image, this.nms_threshold, this.score_threshold
         )

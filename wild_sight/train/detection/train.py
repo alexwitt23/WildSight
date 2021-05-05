@@ -84,7 +84,7 @@ def train(
     )
     if initial_timestamp is not None:
         model.load_state_dict(
-            torch.load(initial_timestamp / "ap30.pt", map_location="cpu")
+            torch.load(initial_timestamp / "min-loss.pt", map_location="cpu")
         )
     ema_model = ema.Ema(model)
     model.to(device)
@@ -160,7 +160,7 @@ def train(
     # Begin training. Loop over all the epochs and run through the training data, then
     # the evaluation data. Save the best weights for the various metrics we capture.
     for epoch in range(epochs):
-        """
+        
         all_losses, clf_losses, reg_losses = [], [], []
 
         # Set the train loader's epoch so data will be re-shuffled.
@@ -233,7 +233,7 @@ def train(
                         utils.save_model(model.module, save_dir / "min-loss.pt")
                     else:
                         utils.save_model(model, save_dir / "min-loss.pt")
-        """
+        
         # Call evaluation function if past eval delay.
         if epoch >= eval_start_epoch:
 
@@ -256,7 +256,7 @@ def train(
                 img_size,
                 save_dir,
             )
-            """
+            
             if is_main:
                 log.info(f"Evaluation took {time.perf_counter() - start:.3f} seconds.")
                 log.info(f"Improved metrics: {improved_metics}")
@@ -265,7 +265,7 @@ def train(
                     utils.save_model(model, save_dir / f"{metric}.pt")
                 for metric in ema_improved_metrics:
                     utils.save_model(model, save_dir / f"ema-{metric}.pt")
-            """
+            
         if is_main:
             log.info(
                 f"epoch={epoch}. base={eval_results}. ema_results={ema_eval_results}"
@@ -413,8 +413,8 @@ def create_data_loader(
         pin_memory=True,
         sampler=sampler,
         collate_fn=collate_fn,
-        num_workers=max(torch.multiprocessing.cpu_count() // world_size, 8),
-        drop_last=True,
+        num_workers=0,
+        drop_last=True if not val else False,
     )
     return loader, sampler
 

@@ -5,16 +5,36 @@
     --coco_metadata_path "~/Downloads/whaleshark.coco/annotations/instances_train2020.json,/media/alex/Elements/gzgc.coco/annotations/instances_train2020.json,/home/alex/datasets/coco/instances_train2017.json,/home/alex/datasets/coco/instances_val2017.json" \
     --coco_image_dirs "~/Downloads/whaleshark.coco/images/train2020,/media/alex/Elements/gzgc.coco/images/train2020,/home/alex/datasets/coco/images/train2017,/home/alex/datasets/coco/images/val2017" \
     --save_dir ~/datasets/whale-giraffe-zebra-coco
+
+
+Experiment 1:
+Train a model on everything but COCO.
+
+./wild_sight/train/train_utils/combine_coco.py \
+    --coco_metadata_path "~/Downloads/whaleshark.coco/annotations/instances_train2020.json,/media/alex/Elements/gzgc.coco/annotations/instances_train2020.json" \
+    --coco_image_dirs "~/Downloads/whaleshark.coco/images/train2020,/media/alex/Elements/gzgc.coco/images/train2020,/home/alex/Downloads/archive (2)/shark-images" \
+    --save_dir ~/datasets/whale-giraffe-zebra
+
+./wild_sight/train/train_utils/combine_coco.py \
+    --coco_metadata_path "/home/alex/datasets/swift-parrots/dataset/annotations.json" \
+    --coco_image_dirs "/home/alex/datasets/swift-parrots/dataset/images,/home/alex/datasets/birds" \
+    --save_dir ~/datasets/swift-parrot-and-birds
+
+./wild_sight/train/train_utils/combine_coco.py \
+    --coco_metadata_path "/home/alex/datasets/swift-parrots/dataset-without-tails-new/annotations.json" \
+    --coco_image_dirs "/home/alex/datasets/swift-parrots/dataset-without-tails-new/images,/home/alex/datasets/birds" \
+    --save_dir ~/datasets/swift-parrot-and-birds-no-tails-new
 """
 
 import argparse
 import pathlib
 import json
 import shutil
+import hashlib
 from typing import List
 
 
-CLASSES = {"zebra": False, "giraffe": False, "rhincodon_typus": False}
+CLASSES = {"parrot": False}
 CATEGORIES = []
 
 def merge_datasets(
@@ -30,6 +50,7 @@ def merge_datasets(
     for label_path, image_dir in zip(metadata_paths, image_dirs):
         new_image_dir = save_dir / "images" / image_dir.parent.parent.name
         new_image_dir.mkdir(exist_ok=True, parents=True)
+        print(metadata_paths)
         metadata = json.loads(label_path.expanduser().read_text())
         image_id_offset = len(images)
         category_id_offset = len(categories)
@@ -84,13 +105,17 @@ def merge_datasets(
         new_image_dir = save_dir / "images" / image_dir.name
         new_image_dir.mkdir(exist_ok=True, parents=True)
         for ext in ["jpg", "jpeg", "JPG", "jpeg"]:
-            for image in image_dir.glob(f"*.{ext}"):
-                print(image)
-                new_file = new_image_dir / image.name
-                print(new_file)
+            for image in image_dir.rglob(f"*.{ext}"):
+                image_dict = {
+                    "id": len(images),
+                    "file_name": str(image)
+                }
+                images.append(image_dict)
+                new_file = new_image_dir / f"{hashlib.sha256(bytes(image)).hexdigest()}{image.suffix}"
+                print(image, new_file)
                 if not new_file.is_file():
                     shutil.copy2(
-                        image, new_image_dir / image.name
+                        image, new_file
                     )
     
     final_cats = set([anno["category_id"] for anno in annotations if "category_id" in anno])
@@ -122,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument("--save_dir", type=pathlib.Path, required=True)
     args = parser.parse_args()
     metadata_paths = [
-        pathlib.Path(path) for path in args.coco_metadata_paths.split(",")
+        pathlib.Path(path).expanduser() for path in args.coco_metadata_paths.split(",")
     ]
-    image_dirs = [pathlib.Path(path) for path in args.coco_image_dirs.split(",")]
+    image_dirs = [pathlib.Path(path).expanduser() for path in args.coco_image_dirs.split(",")]
     merge_datasets(metadata_paths, image_dirs, args.save_dir.expanduser())
