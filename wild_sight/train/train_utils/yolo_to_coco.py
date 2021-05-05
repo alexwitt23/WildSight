@@ -9,11 +9,11 @@ from PIL import Image
 import cv2
 
 
-_SAVE_DIR = pathlib.Path("/home/alex/datasets/swift-parrots/dataset-withoutails")
+_SAVE_DIR = pathlib.Path("/home/alex/datasets/swift-parrots/dataset-without-tails-new")
 _IMG_SAVE_DIR = _SAVE_DIR / "images"
 _IMG_SAVE_DIR.mkdir(parents=True, exist_ok=True)
-_IMG_DIR = pathlib.Path("/home/alex/datasets/swift-parrots/CURRENT")
-_LABELS_DIR = pathlib.Path("/home/alex/datasets/swift-parrots/LABELS_WITHOUT_TAILS")
+_IMG_DIR = pathlib.Path("/home/alex/datasets/swift-parrots/FINAL")
+_LABELS_DIR = pathlib.Path("/home/alex/datasets/swift-parrots/FINAL_TXT")
 _IMG_EXTS = [".jpg", ".jpeg", ".png"]
 
 

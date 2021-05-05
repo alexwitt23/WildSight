@@ -33,4 +33,4 @@ training:
   eval_start_epoch: 10
 data:
   name: "WhaleShark"
-  data_path: "/home/alex/datasets/swift-parrot-and-birds-no-tails"
+  data_path: "/home/alex/datasets/swift-parrot-and-birds-no-tails-new"

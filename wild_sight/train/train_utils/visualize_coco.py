@@ -9,8 +9,8 @@ import cv2
 save_dir = pathlib.Path("/tmp/viz")
 save_dir.mkdir(exist_ok=True, parents=True)
 
-data_dir = pathlib.Path("~/datasets/swift-parrots/dataset/images").expanduser()
-data_path = pathlib.Path("~/datasets/swift-parrots/dataset/annotations.json").expanduser()
+data_dir = pathlib.Path("/home/alex/datasets/swift-parrots/dataset-without-tails-new/images").expanduser()
+data_path = pathlib.Path("/home/alex/datasets/swift-parrots/dataset-without-tails-new/annotations.json").expanduser()
 data = json.loads(data_path.read_text())
 
 

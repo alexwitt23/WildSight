@@ -21,9 +21,9 @@ Train a model on everything but COCO.
     --save_dir ~/datasets/swift-parrot-and-birds
 
 ./wild_sight/train/train_utils/combine_coco.py \
-    --coco_metadata_path "/home/alex/datasets/swift-parrots/dataset-withoutails/annotations.json" \
-    --coco_image_dirs "/home/alex/datasets/swift-parrots/dataset-withoutails/images,/home/alex/datasets/birds" \
-    --save_dir ~/datasets/swift-parrot-and-birds-no-tails
+    --coco_metadata_path "/home/alex/datasets/swift-parrots/dataset-without-tails-new/annotations.json" \
+    --coco_image_dirs "/home/alex/datasets/swift-parrots/dataset-without-tails-new/images,/home/alex/datasets/birds" \
+    --save_dir ~/datasets/swift-parrot-and-birds-no-tails-new
 """
 
 import argparse
