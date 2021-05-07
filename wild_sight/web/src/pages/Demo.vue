@@ -86,6 +86,7 @@ export default {
   },
   data () {
     return {
+      results: {},
       userConfidence: 0.50,
       // store the promises of initialization
       image: null,
@@ -101,6 +102,7 @@ export default {
       maxCanvasWidth: 1200,
       filenames: [],
       time: 0,
+      modelSize: 512,
       exampleImages: [
         {"url": "https://user-images.githubusercontent.com/31543169/114466579-4b9b0f00-9bae-11eb-9c05-c1dd5a874e34.jpg"},
         {"url": "https://user-images.githubusercontent.com/31543169/114466605-53f34a00-9bae-11eb-8683-12ce029339f5.jpg"},
@@ -118,7 +120,7 @@ export default {
       this.filenames = [];
       for (let fl of event.target.files) {
 
-        this.filenames.push( fl.name );
+        this.filenames.push(fl.name);
        
         let reader = new FileReader();
         reader.onload = e => {
@@ -140,7 +142,7 @@ export default {
               this.imgHeight = img.height
             }
             
-            this.predict(img)
+            this.predict(img, fl.name)
           };
         }
         reader.readAsDataURL(fl);
@@ -155,22 +157,21 @@ export default {
     async loadCustomModel () {
       let modelFilepath = process.env.NODE_ENV === 'production' ? MODEL_URLS["remote"] : MODEL_URLS["local"];
       model = await tf.loadGraphModel(modelFilepath)
-      this.isModelReady = true
       const zeros = tf.zeros([1, 3, 512, 512])
       const predictions = await model.executeAsync(zeros)
       const regressions = predictions.slice([0, 0], [-1, 4])
       const class_logits = predictions.slice([0, 4], [-1, -1])
-
       await this.decoder.get_boxes(class_logits, regressions)
+
       console.log("Loaded model.")
+      this.isModelReady = true
     },
 
-    async predict(imgElement){
+    async predict(imgElement, imageName){
       this.imgElement = imgElement
       const img = tf.browser.fromPixels(imgElement).resizeBilinear([512, 512]).toFloat().expandDims(0).transpose([0, 3, 1, 2])
       const mean = tf.tensor([0.485, 0.456, 0.406]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
       const std = tf.tensor([0.229, 0.224, 0.225]).expandDims(0).expandDims(-1).expandDims(-1).mul(255.0)
-      
       const normalized = img.sub(mean).div(std)
 
       //timing variable
@@ -188,6 +189,13 @@ export default {
       this.classes = classes
       this.bboxes = bboxes
       this.confidences = confidences
+
+      this.results[imageName] = {
+        "classes": classes.arraySync(),
+        "bboxes": bboxes.arraySync(),
+        "confidences": confidences.arraySync(),
+      }
+
       this.renderPredictionBoxes()
       img.dispose()
       this.isResultReady = true
@@ -202,18 +210,24 @@ export default {
       ctx.drawImage(this.imgElement, 0, 0, this.imgWidth, this.imgHeight);
       
       for (var i = 0; i < this.bboxes.shape[0]; i++){
-
+        
         let con = this.confidences.slice([i], [1]).toFloat().dataSync()
         let arr = this.bboxes.slice([i, 0], [1, -1]).toInt().dataSync()
+        console.log(arr)
 
-        const minX = arr[0] / 512 * this.imgWidth
-        const minY = arr[1] / 512 * this.imgHeight
-        const maxX = arr[2] / 512 * this.imgWidth
-        const maxY = arr[3] / 512 * this.imgHeight
+        const minX = arr[0] / this.modelSize * this.imgWidth
+        const minY = arr[1] / this.modelSize * this.imgHeight
+        const maxX = arr[2] / this.modelSize * this.imgWidth
+        const maxY = arr[3] / this.modelSize * this.imgHeight
 
         if (con > this.userConfidence / 100) {
           ctx.beginPath()
-          ctx.rect(minX, minY, maxX - minX, maxY - minY)
+          ctx.rect(
+            minX < 0 ? 0 : minX,
+            minY < 0 ? 0 : minY,
+            maxX - minX > this.imgWidth ? this.imgWidth : maxX - minX,
+            maxY - minY > this.imgHeight ? this.imgHeight : maxY - minY
+          )
           ctx.lineWidth = 3
           ctx.strokeStyle = 'red'
           ctx.fillStyle = 'red'
@@ -224,38 +238,43 @@ export default {
         }
       }
     },
-    // function to set up initial headings for csv file
+
     csvInit(){
-      // initilize header string
       this.header = ["image", "class", "confidence", "x0", "y0", "x1", "y1"].join(',');
-      this.csv    = ''        // initialize csv string
-      this.inm    = 0         // image number
-
+      this.csv    = ''
+      this.imageIdx    = 0
     },
-    // function to output csv, called by predict ()
-    csvExport() {
-      // add confidence and bounding box data for each box
-      for (var i = 0; i < this.bboxes.shape[0]; i++){
-    
-        let arr = this.bboxes.slice([i, 0], [1, -1]).toFloat().dataSync();
-        let con = this.confidences.slice([i], [1]).toFloat().dataSync()[0]
-        let cls = this.classes.slice([i], [1]).toFloat().dataSync()[0];
 
-        if (con > this.userConfidence / 100) {
-          var row = [
-            this.filenames[this.inm],
-            String(CLASS_NAMES[cls]),
-            con,
-            arr[0] / 512 * this.imgWidth,
-            arr[1] / 512 * this.imgHeight,
-            arr[2] / 512 * this.imgWidth,
-            arr[3] / 512 * this.imgHeight
-          ];
-          this.csv += row.join(',');
-          this.csv += "\n"
+    csvExport() {
+      for (var i = 0; i < this.filenames.length; i++){
+        let fileName = this.filenames[i]
+
+        const results = this.results[fileName]
+        let arrs = results["bboxes"]
+        let cons = results["confidences"]
+        let classes = results["classes"];
+
+        for (var j = 0; j < arrs.length; j++){
+          let con = cons[j]
+          let arr = arrs[j]
+          let cls = classes[j];
+          if (con > this.userConfidence / 100) {
+
+            var row = [
+              this.filenames[i],
+              String(CLASS_NAMES[cls]),
+              con,
+              arr[0] / this.modelSize * this.imgWidth,
+              arr[1] / this.modelSize * this.imgHeight,
+              arr[2] / this.modelSize * this.imgWidth,
+              arr[3] / this.modelSize * this.imgHeight
+            ];
+            this.csv += row.join(',');
+            this.csv += "\n"
+          }
         }
+        this.imageIdx++
       }
-      this.inm++
 
     },
     downloadResults () {

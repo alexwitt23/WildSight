@@ -221,7 +221,12 @@ export default {
 
         if (con > this.userConfidence / 100) {
           ctx.beginPath()
-          ctx.rect(minX, minY, maxX - minX, maxY - minY)
+          ctx.rect(
+            minX < 0 ? 0 : minX,
+            minY < 0 ? 0 : minY,
+            maxX - minX > this.imgWidth ? this.imgWidth : maxX - minX,
+            maxY - minY > this.imgHeight ? this.imgHeight : maxY - minY
+          )
           ctx.lineWidth = 3
           ctx.strokeStyle = 'red'
           ctx.fillStyle = 'red'
